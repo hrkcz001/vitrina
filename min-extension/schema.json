@@ -1,0 +1,46 @@
+[
+  {
+    "namespace": "minGlass",
+    "description": "Chrome-level hooks for the Min Glass UI",
+    "functions": [
+      {
+        "name": "init",
+        "type": "function",
+        "description": "Registers stylesheets and listeners in all browser windows",
+        "async": true,
+        "parameters": [
+          { "name": "theme", "type": "string" }
+        ]
+      },
+      {
+        "name": "setTheme",
+        "type": "function",
+        "description": "Switches the stylesheet in all browser windows",
+        "async": true,
+        "parameters": [
+          { "name": "theme", "type": "string" }
+        ]
+      },
+      {
+        "name": "setTabColor",
+        "type": "function",
+        "description": "Stores a site color for a tab; empty string clears it",
+        "async": true,
+        "parameters": [
+          { "name": "tabId", "type": "integer", "minimum": 0 },
+          { "name": "color", "type": "string" }
+        ]
+      },
+      {
+        "name": "setMenuOptions",
+        "type": "function",
+        "description": "Sets menu visibility preferences (alwaysShowLeft, alwaysShowRight)",
+        "async": true,
+        "parameters": [
+          { "name": "alwaysShowLeft", "type": "boolean" },
+          { "name": "alwaysShowRight", "type": "boolean" }
+        ]
+      }
+    ]
+  }
+]

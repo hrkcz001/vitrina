@@ -1,0 +1,450 @@
+/*
+ * Однострочный чёрно-белый интерфейс.
+ *
+ * Всё живёт в одной полосе высотой --bar-height:
+ *   [url] [вкладки ........................] [view] [меню] [_ □ x]
+ *
+ * nav-bar висит поверх полосы вкладок (position: absolute) и сам по себе
+ * прозрачен для мыши. От него видны только адресная строка (свёрнута
+ * в квадрат слева) и две кнопки справа. При наведении или фокусе (Ctrl+L)
+ * адресная строка разворачивается на всю ширину поверх вкладок.
+ *
+ * Стиль: только чёрный и белый. Объём даёт глянец с жёстким срезом:
+ * сверху белый блик, обрывается резко, ниже чистый чёрный, у дна отсвет.
+ */
+
+:root {
+    --bar-height: 32px;
+    --btn-width: 32px;
+    --right-gap: calc(var(--btn-width) * 5); /* view + меню + 3 кнопки окна */
+    --radius: 4px;
+
+    --c-fg: #fff;
+    --c-dim: rgba(255, 255, 255, 0.55);
+    --c-ring: rgba(255, 255, 255, 0.85);
+
+    /* Фон полосы: чёрный, лёгкий блик сверху и косая штриховка */
+    --g-bar:
+        repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 6px),
+        linear-gradient(#262626 0%, #050505 50%, #000 100%);
+
+    /* Глянец с жёстким срезом: блик → обрыв → чёрный → отсвет у дна */
+    --g-gloss:
+        linear-gradient(#fff 0%, #8c8c8c 32%, #000 33%, #000 68%, #3a3a3a 100%);
+    --g-gloss-dim:
+        linear-gradient(#5a5a5a 0%, #1c1c1c 32%, #000 33%, #000 68%, #1c1c1c 100%);
+    /* Инверсия: белая кнопка с чёрным низом-тенью */
+    --g-inverse:
+        linear-gradient(#fff 0%, #fff 45%, #cfcfcf 46%, #fff 100%);
+
+    /* Подсветка закладок — оставлена как была */
+    --g-hover: linear-gradient(#2e2e2e, #222222);
+    --hl-top: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+    /* Глушим цвета тем Firefox */
+    --tab-min-height: var(--bar-height) !important;
+    --lwt-accent-color: #000 !important;
+    --lwt-text-color: #fff !important;
+    --lwt-tab-line-color: transparent !important;
+    --tab-line-color: transparent !important;
+    --toolbar-bgcolor: transparent !important;
+    --toolbar-color: #fff !important;
+    --focus-outline-color: #fff !important;
+    --toolbar-field-background-color: #000 !important;
+    --toolbar-field-focus-background-color: #000 !important;
+    --toolbar-field-border-color: transparent !important;
+    --toolbar-field-focus-border-color: #fff !important;
+}
+
+::selection {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+
+/* ---------- Каркас ---------- */
+
+#navigator-toolbox {
+    background: var(--g-bar) !important;
+    border: none !important;
+    color: var(--c-fg) !important;
+}
+
+#titlebar,
+#TabsToolbar,
+#tabbrowser-tabs,
+.tabbrowser-tab,
+.tab-stack,
+.tab-background,
+.tab-content {
+    height: var(--bar-height) !important;
+    min-height: var(--bar-height) !important;
+    max-height: var(--bar-height) !important;
+    margin: 0 !important;
+}
+
+/* nav-bar накладывается на полосу вкладок и не ловит клики сам */
+#nav-bar {
+    position: absolute !important;
+    inset: 0 0 auto 0 !important;
+    height: var(--bar-height) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    z-index: 99 !important;
+}
+
+
+/* ---------- Лишнее ---------- */
+
+#nav-bar .titlebar-buttonbox-container,
+#nav-bar-customization-target > :not(#urlbar-container, #PanelUI-button, #firefox-view-button),
+#alltabs-button,
+#unified-extensions-button,
+.titlebar-spacer,
+.tabbrowser-tab::before,
+.tabbrowser-tab::after {
+    display: none !important;
+}
+
+
+/* ---------- Кнопки справа ---------- */
+
+/* Кнопки окна (свернуть / развернуть / закрыть) */
+#TabsToolbar .titlebar-buttonbox-container {
+    display: flex !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    height: var(--bar-height) !important;
+    z-index: 102 !important;
+}
+
+/*
+ * Без скругления: Gecko учитывает border-radius при попадании мышью,
+ * и со скруглением угол экрана «мимо» крестика.
+ */
+.titlebar-button {
+    width: var(--btn-width) !important;
+    height: var(--bar-height) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+.titlebar-button:hover {
+    background: var(--g-gloss-dim) !important;
+}
+
+.titlebar-close:hover {
+    background: var(--g-inverse) !important;
+    fill: #000 !important;
+    color: #000 !important;
+}
+
+/* Меню и Firefox View — левее кнопок окна */
+#PanelUI-button,
+#firefox-view-button {
+    position: absolute !important;
+    top: 0 !important;
+    width: var(--btn-width) !important;
+    height: var(--bar-height) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    z-index: 101 !important;
+}
+
+#PanelUI-button       { right: calc(var(--btn-width) * 3) !important; }
+#firefox-view-button  { right: calc(var(--btn-width) * 4) !important; }
+
+#PanelUI-menu-button {
+    list-style-image: url("chrome://global/skin/icons/settings.svg") !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#PanelUI-menu-button,
+#firefox-view-button .toolbarbutton-icon {
+    fill: var(--c-fg) !important;
+    color: var(--c-fg) !important;
+}
+
+#PanelUI-menu-button > .toolbarbutton-badge-stack,
+#firefox-view-button > .toolbarbutton-icon {
+    background: transparent !important;
+    border-radius: var(--radius) !important;
+}
+
+#PanelUI-menu-button:is(:hover, [open]) > .toolbarbutton-badge-stack,
+#firefox-view-button:is(:hover, [open]) > .toolbarbutton-icon {
+    background: var(--g-gloss-dim) !important;
+}
+
+
+/* ---------- Адресная строка ---------- */
+
+/* В покое — квадрат слева. При наведении/фокусе — на всю ширину поверх вкладок */
+#urlbar-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: var(--btn-width) !important;
+    height: var(--bar-height) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+    transition: width 0.15s ease-out !important;
+    z-index: 5 !important;
+}
+
+#urlbar-container:hover,
+#urlbar-container:focus-within {
+    width: calc(100vw - var(--right-gap)) !important;
+}
+
+/*
+ * Квадратная строка. Форму в Firefox 157 задают переменные, а не сами
+ * элементы: фон строки (.urlbar-background) и нижняя половина списка
+ * (.urlbarView-background) берут радиус из них. Обнуляем все.
+ * Отступ «вылета» фона при открытом списке тоже убираем.
+ */
+#urlbar,
+#urlbar .urlbarView {
+    --urlbar-height: var(--bar-height) !important;
+    --urlbar-min-height: var(--bar-height) !important;
+    --urlbar-container-height: var(--bar-height) !important;
+
+    --button-border-radius: 0px !important;
+    --urlbar-border-radius: 0px !important;
+    --urlbarview-border-radius: 0px !important;
+    --urlbar-inner-border-radius: 0px !important;
+    --urlbar-background-border-radius: 0px !important;
+    --urlbar-background-border-top-radius-open: 0px !important;
+    --urlbarView-row-border-radius: 0px !important;
+    --urlbar-background-overhang-open: 0px !important;
+
+    --urlbar-background-color: #000 !important;
+    --urlbar-background-color-focus: #000 !important;
+    --urlbar-background-border: 1px solid var(--c-dim) !important;
+    --urlbar-background-border-focused: 1px solid #fff !important;
+    --urlbar-background-border-open: 1px solid #fff !important;
+    --urlbar-background-outline-focused: none !important;
+    --urlbar-background-box-shadow-open: 0 8px 0 -4px rgba(0, 0, 0, 0.7) !important;
+
+    --urlbarview-background-color-hover: transparent !important;
+    --urlbarview-background-color-selected: transparent !important;
+    --urlbarview-text-color-selected: #000 !important;
+    --urlbarview-text-color-action: var(--c-dim) !important;
+    --urlbarview-separator-color: var(--c-dim) !important;
+}
+
+#urlbar {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Свёрнутая — глянцевый квадрат; раскрытая — чистый чёрный */
+#urlbar > .urlbar-background {
+    background-image: var(--g-gloss-dim) !important;
+}
+
+#urlbar-container:is(:hover, :focus-within) #urlbar > .urlbar-background {
+    background-image: none !important;
+}
+
+#identity-box {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+#identity-icon-labels,
+#tracking-protection-icon-container,
+.urlbar-icon,
+.urlbar-icon-wrapper {
+    display: none !important;
+}
+
+#urlbar .urlbar-input {
+    color: var(--c-fg) !important;
+    font-weight: 500 !important;
+    padding-left: 10px !important;
+}
+
+/* Текст скрыт, пока строка свёрнута */
+#urlbar:not(:hover, [focused]) .urlbar-input {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* --- Список результатов --- */
+
+.urlbarView-row:not([selected]):hover > .urlbarView-row-inner {
+    background: var(--g-gloss-dim) !important;
+}
+
+/* Выбранная строка — инверсия */
+.urlbarView-row[selected] > .urlbarView-row-inner {
+    background: var(--g-inverse) !important;
+    color: #000 !important;
+}
+
+.urlbarView-row[selected] :is(.urlbarView-title, .urlbarView-url, .urlbarView-action, .urlbarView-title-separator) {
+    color: #000 !important;
+}
+
+.urlbarView-row[selected] .urlbarView-favicon {
+    fill: #000 !important;
+}
+
+.searchbar-engine-one-off-item {
+    border-radius: 0 !important;
+}
+
+.searchbar-engine-one-off-item:hover {
+    background: var(--g-gloss-dim) !important;
+}
+
+.searchbar-engine-one-off-item[selected] {
+    background: var(--g-inverse) !important;
+}
+
+
+/* ---------- Вкладки ---------- */
+
+#tabbrowser-tabs {
+    --tab-block-margin: 0px !important;
+}
+
+/* Место под квадрат адресной строки слева и кнопки справа */
+#TabsToolbar {
+    padding-left: var(--btn-width) !important;
+    padding-right: var(--right-gap) !important;
+}
+
+/* Вкладки растягиваются на всю ширину */
+.tabbrowser-tab[fadein]:not([pinned]) {
+    max-width: 100vw !important;
+    flex-grow: 1 !important;
+    padding: 0 !important;
+}
+
+.tab-background {
+    margin: 2px 1px !important;
+    border: none !important;
+    border-radius: var(--radius) !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.tabbrowser-tab:not([selected]):hover .tab-background {
+    background: var(--g-gloss-dim) !important;
+}
+
+/* Активная: белый глянец сверху, обрыв в чёрный, белая обводка */
+.tabbrowser-tab[selected] .tab-background {
+    background: var(--g-gloss) !important;
+    box-shadow: inset 0 0 0 1px var(--c-ring), 0 1px 3px #000 !important;
+    opacity: 1 !important;
+}
+
+.tab-label {
+    color: var(--c-dim) !important;
+}
+
+.tabbrowser-tab:hover .tab-label {
+    color: var(--c-fg) !important;
+}
+
+.tabbrowser-tab[selected] .tab-label {
+    color: #fff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 0 #000, 0 0 3px #000 !important;
+    opacity: 1 !important;
+}
+
+.tab-content {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 10px !important;
+}
+
+.tab-text {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+/* Крестик: белый, на ховере — белый квадрат с чёрным крестом */
+.tab-close-button {
+    fill: #fff !important;
+    color: #fff !important;
+    border-radius: var(--radius) !important;
+}
+
+.tab-close-button:hover {
+    background: var(--g-inverse) !important;
+    fill: #000 !important;
+    color: #000 !important;
+}
+
+.tab-close-button:hover:active {
+    background: #fff !important;
+}
+
+#tabs-newtab-button {
+    width: var(--btn-width) !important;
+    height: var(--bar-height) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    fill: #fff !important;
+}
+
+#tabs-newtab-button > .toolbarbutton-icon {
+    background: transparent !important;
+    border-radius: var(--radius) !important;
+}
+
+#tabs-newtab-button:hover > .toolbarbutton-icon {
+    background: var(--g-gloss-dim) !important;
+}
+
+
+/* ---------- Панель закладок ---------- */
+
+#PersonalToolbar {
+    background: transparent !important;
+    border: none !important;
+    padding: 2px 0 !important;
+}
+
+#PlacesToolbarItems > .bookmark-item {
+    border-radius: var(--radius) !important;
+}
+
+#PlacesToolbarItems > .bookmark-item:hover {
+    background: var(--g-hover) !important;
+    box-shadow: var(--hl-top) !important;
+}
+
+/* Только иконки; подпись выезжает у той закладки, на которую навели */
+#PlacesToolbarItems > .bookmark-item > .toolbarbutton-text {
+    display: block !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    opacity: 0 !important;
+    transition: max-width 0.2s ease-out, opacity 0.2s ease-out, margin 0.2s ease-out !important;
+}
+
+/* Только если подпись есть — иначе закладка дёргается на пустом отступе */
+#PlacesToolbarItems > .bookmark-item[label]:not([label=""]):hover > .toolbarbutton-text {
+    max-width: 150px !important;
+    margin-inline-start: 4px !important;
+    opacity: 1 !important;
+}
