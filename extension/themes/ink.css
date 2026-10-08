@@ -360,10 +360,10 @@ browser {
     display: inline-flex !important;
     visibility: visible !important;
     width: var(--flyout-btn-width, 28px) !important;
-    height: calc(100% - 2px) !important;
+    height: 100% !important;
     min-height: 0 !important;
-    max-height: calc(var(--bar-height) - 8px) !important;
-    margin: 1px 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
     padding: 0 !important;
     align-items: center !important;
     justify-content: center !important;
@@ -663,10 +663,10 @@ browser {
     position: static !important;
     width: var(--flyout-btn-width, 28px) !important;
     min-width: var(--flyout-btn-width, 28px) !important;
-    height: calc(100% - 2px) !important;
+    height: 100% !important;
     min-height: 0 !important;
-    max-height: calc(var(--bar-height) - 8px) !important;
-    margin: 1px 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
     padding: 0 !important;
     align-items: center !important;
     justify-content: center !important;
@@ -679,6 +679,13 @@ browser {
     cursor: pointer !important;
     flex: none !important;
     transition: background 0.12s ease-out !important;
+}
+
+/* Match the left panel: the last button is rounded to the capsule's corner */
+#min-right-flyout > :last-child,
+#min-right-flyout > :last-child:hover {
+    border-top-right-radius: var(--tab-radius) !important;
+    border-bottom-right-radius: var(--tab-radius) !important;
 }
 
 #min-right-flyout .toolbarbutton-icon,
