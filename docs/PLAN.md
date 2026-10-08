@@ -40,10 +40,9 @@ This already matches current tags. Just double-check `checkver` regex works with
 Files with Russian comments: `extension/api.js` (29 lines), `background.js` (1),
 `content-script.js` (3), `popup/popup.html` (5), `themes/gloss.css` (41),
 `themes/ink.css` (66).
-Action: translate comments and inline Russian UI strings to English in code
-(popup labels, tooltips like "Панель управления (ЛКМ)", "Настройки").
-Popup text may stay Russian ONLY as `label` strings — but for consistency
-switch popup strings to English too; add a `ru.json` later only if i18n is built.
+Action: translate comments and inline UI strings to English in code
+(popup labels, tooltips).
+Popup text may stay Russian ONLY as `label` strings — but switch to English for consistency (the product is English-only; no emoji, no parenthetical asides).
 Commit: `chore: translate remaining Russian comments/strings to English`.
 
 ### P0.4 Remove leftover empty dir `~/,dev/min-firefox-de-ui-ext`

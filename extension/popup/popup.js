@@ -1,17 +1,17 @@
 "use strict";
 
-const btnGlass = document.getElementById("theme-ink");
-const btnBw = document.getElementById("theme-gloss");
+const btnInk = document.getElementById("theme-ink");
+const btnGloss = document.getElementById("theme-gloss");
 const chkLeft = document.getElementById("always-show-left");
 const chkRight = document.getElementById("always-show-right");
 
 function updateUI(theme) {
   if (theme === "gloss") {
-    btnBw.classList.add("active");
-    btnGlass.classList.remove("active");
+    btnGloss.classList.add("active");
+    btnInk.classList.remove("active");
   } else {
-    btnGlass.classList.add("active");
-    btnBw.classList.remove("active");
+    btnInk.classList.add("active");
+    btnGloss.classList.remove("active");
   }
 }
 
@@ -21,12 +21,12 @@ browser.storage.local.get(["activeTheme", "alwaysShowLeftMenu", "alwaysShowRight
   chkRight.checked = !!data.alwaysShowRightMenu;
 });
 
-btnGlass.addEventListener("click", () => {
+btnInk.addEventListener("click", () => {
   updateUI("ink");
   browser.runtime.sendMessage({ type: "SWITCH_THEME", theme: "ink" });
 });
 
-btnBw.addEventListener("click", () => {
+btnGloss.addEventListener("click", () => {
   updateUI("gloss");
   browser.runtime.sendMessage({ type: "SWITCH_THEME", theme: "gloss" });
 });

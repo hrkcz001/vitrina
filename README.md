@@ -13,10 +13,9 @@ rearranges native toolbar widgets.
 ### Scoop (recommended)
 
 ```powershell
-scoop bucket add personal https://github.com/hrkcz001/scoop_bucket
-scoop install personal/vitrina
+scoop bucket add hrkcz001 https://github.com/hrkcz001/scoop_bucket
+scoop install hrkcz001/vitrina
 ```
-
 The manifest depends on `firefox-developer` and installs the xpi into the
 scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`).
 
@@ -36,7 +35,7 @@ scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`
 - Click on the active tab focuses the URL bar (Min-browser behavior)
 - Pinned extension buttons deck
 - Multi-row wrapping bookmarks toolbar (icons only, hover to reveal labels)
-- Two themes: `vitrina-ink` (ink & glass) and `gloss` (monochrome gloss)
+- Themes: `ink` (ink & glass) and `gloss` (monochrome gloss)
 
 ## Development
 
@@ -63,4 +62,4 @@ See [docs/ANALYSIS.md](docs/ANALYSIS.md) for the phased refactor plan
 
 ## License
 
-MIT
+Apache-2.0 — Copyright 2026 hrkcz001

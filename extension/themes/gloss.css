@@ -107,7 +107,7 @@
 /* ---------- Extras ---------- */
 
 #nav-bar .titlebar-buttonbox-container,
-#nav-bar-customization-target > :not(#urlbar-container, #PanelUI-button, #firefox-view-button),
+#nav-bar-customization-target > :not(#urlbar-container, #PanelUI-button, #firefox-view-button, [id*="-browser-action"], .webextension-action, .unified-extensions-item),
 #alltabs-button,
 #unified-extensions-button,
 .titlebar-spacer,

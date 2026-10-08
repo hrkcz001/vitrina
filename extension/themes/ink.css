@@ -198,7 +198,10 @@ browser {
     display: block !important;
 }
 
-/* Hide everything extra, keep only the buttons for our two panels */
+/* Hide everything extra, keep only the buttons for our two panels.
+ * Scoped to DIRECT children of the customization target: the Vitrina
+ * containers live under #nav-bar, so buttons we relocate into them are out of
+ * scope and cannot be hidden by this rule's high-specificity :not() list. */
 #downloads-button,
 #fxa-toolbar-menu-button,
 #ipprotection-button,
@@ -210,8 +213,8 @@ browser {
 .titlebar-spacer,
 .tabbrowser-tab::before,
 .tabbrowser-tab::after,
-#nav-bar toolbaritem:not(#urlbar-container, #PanelUI-button, #stop-reload-button, [id*="-browser-action"], .unified-extensions-item, #min-control-box, #min-nav-flyout, #min-right-flyout, #min-pinned-deck),
-#nav-bar toolbarbutton:not(
+#nav-bar-customization-target > toolbaritem:not(#urlbar-container, #PanelUI-button, #stop-reload-button, [id*="-browser-action"], .webextension-action, .unified-extensions-item),
+#nav-bar-customization-target > toolbarbutton:not(
     #PanelUI-menu-button,
     #unified-extensions-button,
     #firefox-view-button,
@@ -301,11 +304,11 @@ browser {
     top: 3px !important;
     bottom: 3px !important;
     left: 4px !important;
-    width: 112px !important;
+    width: auto !important;
     height: calc(var(--bar-height) - 6px) !important;
     display: flex !important;
     flex-direction: row !important;
-    align-items: center !important;
+    align-items: stretch !important;
     padding: 0 !important;
     background: color-mix(in srgb, var(--site-accent, #1c1c22) 22%, #111116) !important;
     backdrop-filter: blur(20px) !important;
@@ -356,10 +359,10 @@ browser {
     display: inline-flex !important;
     visibility: visible !important;
     width: var(--flyout-btn-width, 28px) !important;
-    height: 100% !important;
-    min-height: calc(var(--bar-height) - 6px) !important;
-    max-height: calc(var(--bar-height) - 6px) !important;
-    margin: 0 !important;
+    height: calc(100% - 2px) !important;
+    min-height: 0 !important;
+    max-height: calc(var(--bar-height) - 8px) !important;
+    margin: 1px 0 !important;
     padding: 0 !important;
     align-items: center !important;
     justify-content: center !important;
@@ -607,11 +610,11 @@ browser {
     top: 3px !important;
     bottom: 3px !important;
     right: calc(var(--btn-width) * 3 + 4px) !important;
-    width: 84px !important;
+    width: auto !important;
     height: calc(var(--bar-height) - 6px) !important;
     display: flex !important;
     flex-direction: row !important;
-    align-items: center !important;
+    align-items: stretch !important;
     padding: 0 !important;
     background: color-mix(in srgb, var(--site-accent, #1c1c22) 22%, #111116) !important;
     backdrop-filter: blur(20px) !important;
@@ -658,10 +661,10 @@ browser {
     position: static !important;
     width: var(--flyout-btn-width, 28px) !important;
     min-width: var(--flyout-btn-width, 28px) !important;
-    height: 100% !important;
-    min-height: calc(var(--bar-height) - 6px) !important;
-    max-height: calc(var(--bar-height) - 6px) !important;
-    margin: 0 !important;
+    height: calc(100% - 2px) !important;
+    min-height: 0 !important;
+    max-height: calc(var(--bar-height) - 8px) !important;
+    margin: 1px 0 !important;
     padding: 0 !important;
     align-items: center !important;
     justify-content: center !important;
@@ -838,12 +841,8 @@ browser {
     pointer-events: auto !important;
 }
 
-/* Remove the clumsy tooltip under the search button */
-tooltip[label*="search engine"],
-tooltip[label*="Поиск"],
-tooltip[label*="Search"] {
-    display: none !important;
-}
+/* The switcher tooltip is removed in api.js (tooltiptext/title stripped), so
+ * no locale-dependent text matching is needed here. */
 
 /* Style the search-engine dropdown to match the theme */
 .searchmode-switcher-panel::part(content),

@@ -229,7 +229,7 @@ this.vitrina = class extends ExtensionAPI {
     const controlSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round'><path d='M2.5 4h11M2.5 8h11M2.5 12h11'/><circle cx='5.5' cy='4' r='1.2' fill='white'/><circle cx='10.5' cy='8' r='1.2' fill='white'/><circle cx='6.5' cy='12' r='1.2' fill='white'/></svg>";
     controlIcon.setAttribute("src", controlSvg);
     controlIcon.style.listStyleImage = `url("${controlSvg}")`;
-    controlBtn.setAttribute("tooltiptext", "Панель управления (ЛКМ)");
+    controlBtn.setAttribute("tooltiptext", "Control panel");
     controlBtn.appendChild(controlIcon);
 
     const leftFlyout = doc.createXULElement ? doc.createXULElement("hbox") : doc.createElement("div");
@@ -300,7 +300,7 @@ this.vitrina = class extends ExtensionAPI {
     const settingsBtn = doc.createXULElement ? doc.createXULElement("toolbarbutton") : doc.createElement("button");
     settingsBtn.id = "min-settings-btn";
     settingsBtn.className = "toolbarbutton-1";
-    settingsBtn.setAttribute("tooltiptext", "Настройки");
+    settingsBtn.setAttribute("tooltiptext", "Settings");
     const settingsIcon = doc.createXULElement ? doc.createXULElement("image") : doc.createElement("img");
     settingsIcon.className = "toolbarbutton-icon";
     const settingsSvg = "chrome://global/skin/icons/settings.svg";
@@ -330,6 +330,7 @@ this.vitrina = class extends ExtensionAPI {
     }
 
     let rightOpen = false;
+    let rightJustOpened = false;
     const toggleRightFlyout = open => {
       if (this.alwaysShowRight) {
         rightOpen = true;
@@ -338,11 +339,19 @@ this.vitrina = class extends ExtensionAPI {
         doc.documentElement.setAttribute("right-menu-open", "true");
         return;
       }
+      const wasOpen = rightOpen;
       rightOpen = typeof open === "boolean" ? open : !rightOpen;
       if (rightOpen) {
         rightFlyout.classList.add("open");
         panelBtn?.classList.add("flyout-open");
         doc.documentElement.setAttribute("right-menu-open", "true");
+        if (!wasOpen) {
+          // The click that opened us lands on a different target once the
+          // hamburger is hidden, which would instantly re-close the flyout.
+          // Ignore close attempts until the next task.
+          rightJustOpened = true;
+          win.setTimeout(() => { rightJustOpened = false; }, 0);
+        }
       } else {
         rightFlyout.classList.remove("open");
         panelBtn?.classList.remove("flyout-open");
@@ -363,11 +372,11 @@ this.vitrina = class extends ExtensionAPI {
 
     const onPanelBtnClick = e => {
       if (this.alwaysShowRight) return;
-      if (!rightOpen) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }
+      // The hamburger opens the flyout, never the native app menu (the gear
+      // button inside the flyout serves that). Suppress it in all cases.
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
     };
 
     panelBtn?.addEventListener("mousedown", onPanelBtnMouseDown, true);
@@ -385,7 +394,7 @@ this.vitrina = class extends ExtensionAPI {
       if (!this.alwaysShowLeft && !controlBox.contains(e.target)) {
         toggleLeftFlyout(false);
       }
-      if (!this.alwaysShowRight && rightOpen && !rightFlyout.contains(e.target) && !panelBtn?.contains(e.target)) {
+      if (!this.alwaysShowRight && rightOpen && !rightJustOpened && !rightFlyout.contains(e.target) && !panelBtn?.contains(e.target)) {
         toggleRightFlyout(false);
       }
     };
