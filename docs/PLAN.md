@@ -31,16 +31,10 @@ Rationale: it is a byte-identical duplicate of the old ink theme; legacy
 stylesheet pref is off so it is inert, but it confuses debugging.
 Verify: file absent; extension still renders after Firefox restart.
 
-### P0.2 [DONE] Scoop manifest: fix autoupdate URL template
-File: `scoop/buckets/personal/bucket/vitrina.json`
-Bug: autoupdate url uses `v$version-vitrina` (wrong order for `checkver: github`).
-Fix: release tags are `vX.Y.Z-vitrina`; keep `checkver.github` pointing at the
-repo, and set:
-```json
-"autoupdate": { "url": "https://github.com/hrkcz001/vitrina/releases/download/v$version-vitrina/vitrina.xpi" }
-```
-This already matches current tags. Just double-check `checkver` regex works with
-`sed`-style `$version`. No code change needed; verify with `scoop checkver vitrina`.
+### P0.2 [OBSOLETE] Scoop manifest autoupdate URL
+Superseded: scoop distribution was dropped entirely. Vitrina is now installed
+only as a plain unsigned extension (see README/ANALYSIS). The `personal` bucket
+manifest was removed. Kept here for history only.
 
 ### P0.3 [DONE] Translate all comments to English
 Files with Russian comments: `extension/api.js` (29 lines), `background.js` (1),
