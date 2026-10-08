@@ -34,21 +34,26 @@ Fix: open `overflow` on the whole deck descendant chain (`#min-pinned-deck
 toolbarbutton, toolbaritem, .unified-extensions-item-row-wrapper, .webextension-action`).
 (Icon size was NOT the cause; the earlier 18→16 change was noise.)
 
-## TASK 5 — Right menu vs left visual mismatch  [PARTIAL]
-User: no default dividers (that was a two-button hover in the screenshot — not a
-bug). Real diffs: (a) active/hover highlight differs; (b) deck right side seemed
-darker.
-Fix: added `outline:none` to the right flyout buttons + badge-stack/icon (the
-left already had it; the native widgets carried a white focus outline). Cleared
-background/border/shadow/outline on the deck's `.unified-extensions-item-row-wrapper`
-and `.unified-extensions-item`. Verify visually; if the active highlight still
-differs, compare the `:active` gradients next.
+## TASK 5 — Right menu vs left visual mismatch  [FIXED — awaiting visual check]
+User: no default dividers (two-button hover in the screenshot — not a bug).
+Real cause (frame probe): the right menu's icons carried the native focus
+outline — `outline: 2.4px rgb(255,255,255)` on
+`#firefox-view-button .toolbarbutton-icon` and `#unified-extensions-button
+.toolbarbutton-icon`, while the left icons were `0px`. Structural reason: the
+left buttons hold their icon inside `.toolbarbutton-badge-stack` (so the native
+`.toolbarbutton-1 > .toolbarbutton-icon` rule misses it), whereas firefox-view /
+unified-extensions have the icon as a DIRECT child and get the native
+`outline: var(--toolbarbutton-outline)`.
+Fix: override the SOURCE VARIABLES on the flyout containers
+(`--toolbarbutton-outline: none`, hover/active/selected outline colors
+transparent, `--focus-outline: none`) — a specificity fight with the native rule
+is fragile; variable override is reliable. Plus `outline:none` on all descendants
+and `::-moz-focus-inner`.
 
-## TASK 6 — Cleanup & release
-- Remove diagnostics + `docs/NOTES-gear.md` (or keep as history).
-- Bump manifest → 1.1.3, build, commit, push, tag `v1.1.3-vitrina`, gh release.
-- Update `docs/ANALYSIS.md` root-cause section with the ACTUAL mechanism.
-- Update skill `vitrina` → `references/firefox-chrome-css-pitfalls.md`.
+## TASK 6 — Cleanup & release  [DONE through 1.1.5]
+Diagnostics removed; version now 1.1.5; releases v1.1.3/1.1.4/1.1.5 published.
+`docs/NOTES-gear.md` kept as history. Skill `references/firefox-chrome-css-pitfalls.md`
+updated (§2c popuphidden, §5 badge wrapper, §6 anchor visibility, §7 async show).
 
 ## Rules
 - Order 1→2→(3)→4→5→6. Never edit while waiting for user feedback. Build after
