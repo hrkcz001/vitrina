@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Vitrina",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Min-style interface with fluid ink glass aesthetics, dynamic site accent colors, and tactile island tabs",
   "browser_specific_settings": {
     "gecko": {
