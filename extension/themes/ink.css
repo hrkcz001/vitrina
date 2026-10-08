@@ -705,13 +705,41 @@ browser {
     padding: 0 !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
-    outline: none !important;
     fill: #ffffff !important;
     color: #ffffff !important;
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
     -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
+}
+
+/* Both flyouts: kill the native focus/selection outline shown as a 2.4px white
+   frame. Overriding the source VARIABLES is reliable — the native rule is
+   `outline: var(--toolbarbutton-outline)` on `.toolbarbutton-1 > .toolbarbutton-icon`,
+   and a specificity fight with that is fragile. The left menu only escaped it
+   because its icons sit inside `.toolbarbutton-badge-stack`; firefox-view /
+   unified-extensions have the icon as a DIRECT child, so they got the outline. */
+#min-nav-flyout,
+#min-right-flyout {
+    --toolbarbutton-outline: none !important;
+    --toolbarbutton-hover-outline-color: transparent !important;
+    --toolbarbutton-active-outline-color: transparent !important;
+    --toolbarbutton-selected-outline-color: transparent !important;
+    --focus-outline: none !important;
+    --focus-outline-color: transparent !important;
+    --focus-outline-inset: 0 !important;
+}
+#min-nav-flyout *,
+#min-right-flyout * {
+    outline: none !important;
+    outline-style: none !important;
+    outline-width: 0 !important;
+    outline-color: transparent !important;
+}
+#min-nav-flyout ::-moz-focus-inner,
+#min-right-flyout ::-moz-focus-inner {
+    outline: none !important;
+    border: 0 !important;
 }
 
 /* Darken the specific icon's section background on hover */
