@@ -313,18 +313,24 @@ this.vitrina = class extends ExtensionAPI {
     settingsBtn.addEventListener("click", e => {
       e.preventDefault();
       e.stopPropagation();
-      // Open the native app menu directly. Going through menuBtn.click() would
-      // be swallowed by the hamburger-click suppressor below.
-      if (win.PanelUI && typeof win.PanelUI.show === "function") {
-        win.PanelUI.show();
-        return;
-      }
-      const menuBtn = doc.getElementById("PanelUI-menu-button");
-      if (menuBtn) {
-        openingAppMenu = true;
-        menuBtn.click();
-        openingAppMenu = false;
-      }
+      // The native app menu anchors to #PanelUI-button, which the theme hides
+      // (visibility:hidden) while the flyout is open. A hidden anchor is not a
+      // valid panel anchor, so PanelUI.show() opens and immediately tears the
+      // popup down. Reveal the anchor for the duration of the popup (cleared on
+      // popuphidden below), then open it after the current click settles.
+      doc.documentElement.setAttribute("panelui-anchor", "true");
+      win.setTimeout(() => {
+        if (win.PanelUI && typeof win.PanelUI.show === "function") {
+          win.PanelUI.show();
+          return;
+        }
+        const menuBtn = doc.getElementById("PanelUI-menu-button");
+        if (menuBtn) {
+          openingAppMenu = true;
+          menuBtn.click();
+          openingAppMenu = false;
+        }
+      }, 0);
     });
     rightFlyout.appendChild(settingsBtn);
 
@@ -404,7 +410,10 @@ this.vitrina = class extends ExtensionAPI {
     panelBtn?.addEventListener("click", onPanelBtnClick, true);
 
     const appPopup = doc.getElementById("appMenu-popup") || doc.getElementById("PanelUI-popup");
-    const onPopupHidden = () => toggleRightFlyout(false);
+    const onPopupHidden = () => {
+      doc.documentElement.removeAttribute("panelui-anchor");
+      toggleRightFlyout(false);
+    };
     appPopup?.addEventListener("popuphidden", onPopupHidden);
 
     // 3. CLOSE ON CLICK OUTSIDE (a click on the menu buttons does NOT close it!)

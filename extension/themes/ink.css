@@ -602,7 +602,16 @@ browser {
 /* When the right menu is open the deck hamburger is hidden (the gear button works inside the menu) */
 :root[right-menu-open="true"] #PanelUI-button,
 #PanelUI-button.flyout-open {
-    display: none !important;
+    /* Hidden, but keep its layout box: PanelUI anchors the native app menu to
+       this button, and a display:none anchor has no box, so the popup opens and
+       is torn down instantly (fires popuphidden). visibility keeps the box. */
+    visibility: hidden !important;
+}
+
+/* The app menu anchors to #PanelUI-button; a hidden anchor cannot open a panel,
+   so the gear briefly reveals it (set by api.js) while the popup is open. */
+:root[panelui-anchor="true"] #PanelUI-button {
+    visibility: visible !important;
 }
 
 /* Single solid right capsule: noble dark glass, rounded, overflow: hidden */
@@ -794,8 +803,10 @@ browser {
 
 #min-pinned-deck .toolbarbutton-icon,
 #min-pinned-deck .toolbarbutton-badge-stack {
-    width: 18px !important;
-    height: 18px !important;
+    /* Native 16x16: the engine positions the notification badge against these
+       metrics, so an upscaled icon pushes the badge out and clips it. */
+    width: 16px !important;
+    height: 16px !important;
     padding: 0 !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
