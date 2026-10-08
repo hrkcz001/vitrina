@@ -473,15 +473,26 @@ browser {
     box-shadow: none !important;
 }
 
-/* Active/pressed icon: only that icon's section is highlighted */
-#min-nav-flyout > toolbarbutton:active,
+/* Active/pressed icon: only that icon's section is highlighted, ONLY on press.
+   The reload button is a compound widget (#stop-reload-button > #reload-button);
+   whichever of the two carries :active, the whole slot gets the highlight. */
+#min-nav-flyout > *:active,
+#min-nav-flyout #stop-reload-button:active,
+#min-nav-flyout #stop-reload-button:active *,
 #min-nav-flyout #reload-button:active,
+#min-nav-flyout #stop-button:active,
 #min-nav-flyout #developer-button:active,
 #min-nav-flyout #back-button:active,
 #min-nav-flyout #forward-button:active {
     background: rgba(0, 0, 0, 0.55) !important;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
     border: none !important;
+}
+
+/* The reload button itself must never lose the highlight to the outer slot's
+   transparent background — keep its own pressed fill. */
+#min-nav-flyout #reload-button:active {
+    background-color: rgba(0, 0, 0, 0.55) !important;
 }
 
 #min-nav-flyout > :last-child,
@@ -743,8 +754,7 @@ browser {
 }
 
 /* Darken the specific icon's section background on hover */
-#min-right-flyout > toolbarbutton:hover,
-#min-right-flyout > toolbaritem:hover,
+#min-right-flyout > *:hover,
 #min-right-flyout #firefox-view-button:hover,
 #min-right-flyout #unified-extensions-button:hover,
 #min-right-flyout #min-settings-btn:hover {
@@ -753,18 +763,13 @@ browser {
     box-shadow: none !important;
 }
 
-/* Active/open state: only that icon's section is highlighted */
-#min-right-flyout > toolbarbutton[open],
-#min-right-flyout > toolbarbutton:active,
-#min-right-flyout > toolbaritem[open],
-#min-right-flyout > toolbaritem:active,
-#min-right-flyout #firefox-view-button[open],
+/* Active/pressed: strong highlight ONLY at the moment of press. No [open] or
+   :has(panel-open) states — those kept the button lit while its panel was open,
+   unlike the left menu. */
+#min-right-flyout > *:active,
 #min-right-flyout #firefox-view-button:active,
-#min-right-flyout #unified-extensions-button[open],
 #min-right-flyout #unified-extensions-button:active,
-#min-right-flyout #min-settings-btn:active,
-:root:has(#appMenu-popup[state="open"]) #min-settings-btn,
-:root:has(#PanelUI-popup[state="open"]) #min-settings-btn {
+#min-right-flyout #min-settings-btn:active {
     background: rgba(0, 0, 0, 0.55) !important;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
     border: none !important;
