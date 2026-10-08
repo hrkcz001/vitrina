@@ -16,26 +16,16 @@ rearranges native toolbar widgets.
 
 ## Install
 
-Vitrina ships as a plain, unsigned `.xpi` — no store, no scoop. You point
-Firefox Developer Edition at the file.
+Vitrina ships as a plain, unsigned `.xpi` — no store, no scoop, no build step.
 
-1. Get the xpi: download it from the [latest release](https://github.com/hrkcz001/vitrina/releases),
-   or build it locally with `pwsh -File build.ps1` (→ `dist/vitrina.xpi`).
-2. Make sure these prefs are set in `<profile>/user.js`:
+1. Download the xpi from the [latest release](https://github.com/hrkcz001/vitrina/releases).
+2. Set these prefs in `<profile>/user.js`:
    ```
    user_pref("xpinstall.signatures.required", false);
    user_pref("extensions.experiments.enabled", true);
-   user_pref("extensions.autoDisableScopes", 0);
-   user_pref("extensions.enabledScopes", 5);
    ```
-3. Install it either way:
-   - **UI:** `about:addons` → gear → "Install Add-on From File…" (or drag-drop
-     the xpi onto the window). This is the normal path and works on Developer
-     Edition for an unsigned experiment extension once the prefs above are set.
-   - **Auto-load:** copy the xpi to `<profile>/extensions/vitrina@local.xpi`.
-     Firefox registers it on the next start — but only if
-     `extensions.autoDisableScopes` is `0`, otherwise it auto-disables the
-     sideloaded extension (it appears but stays inactive).
+3. In Firefox Developer Edition open `about:addons` → gear →
+   "Install Add-on From File…" and pick the xpi (or drag-drop it onto the window).
 4. Restart Firefox Developer Edition.
 
 ## Features
@@ -61,12 +51,7 @@ extension/
   themes/            theme stylesheets (injected per-window as USER_SHEET)
 docs/ANALYSIS.md     architecture analysis & refactor plan
 docs/PLAN.md         phased execution plan
-build.ps1            packs the xpi (PowerShell); -Install copies it into the profile and sets the required prefs
 ```
-
-After each code change: `pwsh -File build.ps1 -Install` (Firefox must be closed),
-restart Firefox (the extension invalidates the startup cache on shutdown so
-updated CSS is picked up).
 
 ## Roadmap
 
