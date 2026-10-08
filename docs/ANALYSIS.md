@@ -143,6 +143,20 @@ themes/
 - Per-theme menu behaviors, transition tuning.
 
 ## Key constraint to respect
-MV2 experiment API only — no MV3 (experiments require `experiment_apis`,
-Firefox-only anyway). `strict_min_version: 140`. Sheet injection must remain
-per-window USER_SHEET (nsIStyleSheetService leaks into content).
+MV2 experiment API only — no MV3 (experiments require `experiment_apis`).
+`strict_min_version: 140`. Sheet injection must remain per-window USER_SHEET
+(nsIStyleSheetService leaks into content).
+
+## Platform support (hard requirement — not a preference)
+Vitrina runs ONLY on Firefox Developer Edition or Nightly (and ESR with
+experiment prefs enabled by policy). It does NOT run on regular/release
+Firefox, and there is no install trick that changes this:
+- `experiment_apis` requires `extensions.experiments.enabled = true`, which is
+  locked off in release builds.
+- An experiment extension can never be signed by Mozilla, so it must load as an
+  unsigned package; `xpinstall.signatures.required = false` is honored only in
+  DE/Nightly/ESR, ignored on release.
+Therefore the normal `about:addons` / "Install Add-on From File" flow does not
+apply; the only permanent install is dropping the xpi into
+`<profile>/extensions/` (what the scoop installer and `build.ps1 -Install` do).
+`about:debugging` temporary install works but is lost on restart.

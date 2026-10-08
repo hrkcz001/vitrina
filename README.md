@@ -5,8 +5,14 @@ dynamic per-site accent colors, and tactile island tabs. Ships as a
 WebExtension Experiment (MV2) that injects chrome-level stylesheets and
 rearranges native toolbar widgets.
 
-> Firefox-only by design — the experiment API (`experiment_apis`) is required.
-> Works with the scoop-managed `firefox-developer` package (see below).
+> **Firefox Developer Edition / Nightly only — NOT regular Firefox.** Vitrina
+> is a WebExtension Experiment, which needs two things that the release channel
+> forbids: the `experiment_apis` mechanism (`extensions.experiments.enabled` is
+> locked off in release builds) and the ability to load an unsigned package
+> (`xpinstall.signatures.required=false` is ignored in release builds, and
+> Mozilla never signs experiment APIs). ESR can work only if experiment prefs
+> are enabled by policy. The scoop manifest therefore depends on
+> `firefox-developer`.
 
 ## Install
 
@@ -21,9 +27,13 @@ scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`
 
 ### Manual
 
-1. `./build.sh` — packs `extension/` into `dist/vitrina.xpi`
-2. Open Firefox Developer Edition → `about:debugging` → Load Temporary Add-on,
-   or copy the xpi into `<profile>/extensions/vitrina@local.xpi`
+1. `pwsh -File build.ps1` — packs `extension/` into `dist/vitrina.xpi`
+   (or `build.cmd` on plain Command Prompt)
+2. Copy the xpi into `<profile>/extensions/vitrina@local.xpi`. The normal
+   `about:addons` / "Install Add-on From File" flow does NOT work for
+   experiment extensions (they cannot be signed), so this is the only
+   permanent install path; `about:debugging` → Load Temporary Add-on works
+   only until the next restart.
 3. Requires `xpinstall.signatures.required = false` (set automatically by the
    scoop installer; for manual installs add it to `user.js`).
 
@@ -49,11 +59,14 @@ extension/
   popup/             theme picker
   themes/            theme stylesheets (injected per-window as USER_SHEET)
 docs/ANALYSIS.md     architecture analysis & refactor plan
-build.sh             packs the xpi
+docs/PLAN.md         phased execution plan
+build.ps1            packs the xpi (PowerShell; -Install copies to the profile)
+build.sh             thin bash wrapper around build.ps1 (for git-bash users)
 ```
 
-After each code change: `./build.sh`, restart Firefox (the extension
-invalidates the startup cache on shutdown so updated CSS is picked up).
+After each code change: `pwsh -File build.ps1 -Install` (Firefox must be closed),
+restart Firefox (the extension invalidates the startup cache on shutdown so
+updated CSS is picked up).
 
 ## Roadmap
 

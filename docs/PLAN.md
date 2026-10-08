@@ -4,15 +4,20 @@ Goal: take the current state (themes renamed to ink/gloss, repo vitrina,
 scoop manifest vitrina.json, releases v1.1.0-vitrina) to a clean, theme-system
 architecture that can be implemented by a weaker model step by step.
 Every task below is self-contained; do them in order. After each task: run
-`./build.sh`, restart Firefox Dev, and verify the UI visually.
+`pwsh -File build.ps1 -Install` (Firefox must be closed), restart Firefox Dev,
+and verify the UI visually.
 
 Conventions:
-- All code, comments, docs: English.
-- Reports / notes for the user: Russian (do not leave Russian strings in code).
+- The whole product is English: code, comments, docs, README, popup, tooltips,
+  ALL UI strings, no emoji. Do not leave Russian strings anywhere in the repo.
+- Reports / notes back to the maintainer: Russian.
+- Build is PowerShell (`build.ps1`); `build.sh` is only a git-bash wrapper.
 - Git commits: no sign-off, no AI trailers. Push to `origin main`.
 - Manifest theme ids: `ink`, `gloss` (stock/contrast remain skeletons).
 - Never use `nsIStyleSheetService`; always per-window `windowUtils.USER_SHEET`.
-- Do NOT touch `profile/chrome/userChrome.css` — stale, to be deleted in P0.3.
+- Platform: Developer Edition / Nightly ONLY (see ANALYSIS.md "Platform
+  support"). Regular Firefox cannot load experiment extensions at all.
+- `profile/chrome/userChrome.css` was deleted (P0.1); do not reintroduce it.
 
 ---
 
