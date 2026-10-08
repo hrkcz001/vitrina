@@ -1,4 +1,4 @@
-# Min Glass UI
+# Vitrina
 
 Min-style interface for Firefox Developer Edition: fluid ink-glass aesthetics,
 dynamic per-site accent colors, and tactile island tabs. Ships as a
@@ -14,7 +14,7 @@ rearranges native toolbar widgets.
 
 ```powershell
 scoop bucket add personal https://github.com/hrkcz001/scoop_bucket
-scoop install personal/min-glass-ui
+scoop install personal/vitrina
 ```
 
 The manifest depends on `firefox-developer` and installs the xpi into the
@@ -22,9 +22,9 @@ scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`
 
 ### Manual
 
-1. `./build.sh` — packs `min-extension/` into `dist/min-glass-ui.xpi`
+1. `./build.sh` — packs `extension/` into `dist/vitrina.xpi`
 2. Open Firefox Developer Edition → `about:debugging` → Load Temporary Add-on,
-   or copy the xpi into `<profile>/extensions/min-glass-ui@local.xpi`
+   or copy the xpi into `<profile>/extensions/vitrina@local.xpi`
 3. Requires `xpinstall.signatures.required = false` (set automatically by the
    scoop installer; for manual installs add it to `user.js`).
 
@@ -36,12 +36,12 @@ scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`
 - Click on the active tab focuses the URL bar (Min-browser behavior)
 - Pinned extension buttons deck
 - Multi-row wrapping bookmarks toolbar (icons only, hover to reveal labels)
-- Two themes: `min-glass` (ink & glass) and `bw-gloss` (monochrome gloss)
+- Two themes: `vitrina-ink` (ink & glass) and `bw-gloss` (monochrome gloss)
 
 ## Development
 
 ```
-min-extension/
+extension/
   manifest.json      MV2 + experiment API registration
   schema.json        experiment API schema
   api.js             privileged parent-process code (widgets, sheets, accent)

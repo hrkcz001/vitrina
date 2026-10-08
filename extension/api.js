@@ -11,10 +11,10 @@
 /* global ExtensionAPI, Services, Cc, Ci, ChromeUtils */
 
 const THEMES = {
-  "min-glass": "min-glass.css",
+  "ink": "vitrina.css",
   "bw-gloss": "bw-gloss.css",
 };
-const DEFAULT_THEME = "min-glass";
+const DEFAULT_THEME = "ink";
 const DEFAULT_ACCENT = "#1c1c22";
 
 // Подобранные вручную цвета для частых сайтов; остальные — по хэшу домена.
@@ -65,12 +65,12 @@ function domainColor(host) {
   return `hsl(${hue}, 65%, 38%)`;
 }
 
-this.minGlass = class extends ExtensionAPI {
+this.vitrina = class extends ExtensionAPI {
   getAPI(_context) {
     // getAPI вызывается для каждого контекста (фон, попап), поэтому всё
     // состояние живёт в самом экземпляре API, а не здесь.
     return {
-      minGlass: {
+      vitrina: {
         init: async theme => this.start(theme),
         setTheme: async theme => this.applyTheme(theme),
         setTabColor: async (tabId, color) => this.setTabColor(tabId, color),
@@ -88,12 +88,12 @@ this.minGlass = class extends ExtensionAPI {
     this.theme = THEMES[theme] ? theme : DEFAULT_THEME;
     this.windows = new Map();
 
-    // chrome://minglass/content/ -> папка themes/ внутри расширения.
+    // chrome://vitrina/content/ -> папка themes/ внутри расширения.
     const aomStartup = Cc["@mozilla.org/addons/addon-manager-startup;1"]
       .getService(Ci.amIAddonManagerStartup);
     const manifestURI = Services.io.newURI("manifest.json", null, this.extension.rootURI);
     this.chromeHandle = aomStartup.registerChrome(manifestURI, [
-      ["content", "minglass", "themes/"],
+      ["content", "vitrina", "themes/"],
     ]);
 
     for (const win of Services.wm.getEnumerator("navigator:browser")) {
@@ -108,7 +108,7 @@ this.minGlass = class extends ExtensionAPI {
   }
 
   sheetURL(theme) {
-    return `chrome://minglass/content/${THEMES[theme]}`;
+    return `chrome://vitrina/content/${THEMES[theme]}`;
   }
 
   /*
@@ -555,9 +555,9 @@ this.minGlass = class extends ExtensionAPI {
     }
     const win = nativeTab.ownerGlobal;
     const valid = color && color.length < 64 && win.CSS.supports("color", color);
-    nativeTab._minGlassColor = valid ? color : "";
+    nativeTab._vitrinaColor = valid ? color : "";
     // Запоминаем домен: при переходе на другой сайт старый цвет не применится.
-    nativeTab._minGlassHost = hostOf(nativeTab.linkedBrowser?.currentURI);
+    nativeTab._vitrinaHost = hostOf(nativeTab.linkedBrowser?.currentURI);
     if (nativeTab.selected && this.windows.has(win)) {
       this.refresh(win);
     }
@@ -580,11 +580,11 @@ this.minGlass = class extends ExtensionAPI {
       }
 
       const host = hostOf(uri);
-      const own = tab?._minGlassColor && tab?._minGlassHost === host ? tab._minGlassColor : "";
+      const own = tab?._vitrinaColor && tab?._vitrinaHost === host ? tab._vitrinaColor : "";
       const color = own || domainColor(host) || DEFAULT_ACCENT;
       win.document.documentElement.style.setProperty("--site-accent", color);
     } catch (e) {
-      console.error("[MinGlass] refresh failed:", e);
+      console.error("[Vitrina] refresh failed:", e);
     }
   }
 

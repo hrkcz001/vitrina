@@ -1,20 +1,20 @@
 {
   "manifest_version": 2,
-  "name": "Min Glass UI",
+  "name": "Vitrina",
   "version": "1.1.0",
   "description": "Min-style interface with fluid ink glass aesthetics, dynamic site accent colors, and tactile island tabs",
   "browser_specific_settings": {
     "gecko": {
-      "id": "min-glass-ui@local",
+      "id": "vitrina@local",
       "strict_min_version": "140.0"
     }
   },
   "experiment_apis": {
-    "minGlass": {
+    "vitrina": {
       "schema": "schema.json",
       "parent": {
         "scopes": ["addon_parent"],
-        "paths": [["minGlass"]],
+        "paths": [["vitrina"]],
         "script": "api.js"
       }
     }
@@ -30,7 +30,7 @@
     }
   ],
   "browser_action": {
-    "default_title": "Min Glass UI Themes",
+    "default_title": "Vitrina Themes",
     "default_popup": "popup/popup.html"
   },
   "permissions": [

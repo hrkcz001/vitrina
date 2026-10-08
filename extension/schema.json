@@ -1,7 +1,7 @@
 [
   {
-    "namespace": "minGlass",
-    "description": "Chrome-level hooks for the Min Glass UI",
+    "namespace": "vitrina",
+    "description": "Chrome-level hooks for the Vitrina",
     "functions": [
       {
         "name": "init",

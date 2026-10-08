@@ -16,14 +16,14 @@ function updateUI(theme) {
 }
 
 browser.storage.local.get(["activeTheme", "alwaysShowLeftMenu", "alwaysShowRightMenu"]).then((data) => {
-  updateUI(data.activeTheme || "min-glass");
+  updateUI(data.activeTheme || "ink");
   chkLeft.checked = !!data.alwaysShowLeftMenu;
   chkRight.checked = !!data.alwaysShowRightMenu;
 });
 
 btnGlass.addEventListener("click", () => {
-  updateUI("min-glass");
-  browser.runtime.sendMessage({ type: "SWITCH_THEME", theme: "min-glass" });
+  updateUI("ink");
+  browser.runtime.sendMessage({ type: "SWITCH_THEME", theme: "ink" });
 });
 
 btnBw.addEventListener("click", () => {

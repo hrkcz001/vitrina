@@ -1,9 +1,9 @@
-# Min Glass UI — Architecture Analysis & Refactor Plan
+# Vitrina — Architecture Analysis & Refactor Plan
 
 ## What this is
 
 A Firefox Developer Edition UI overhaul shipped as a **WebExtension Experiment**
-(MV2, id `min-glass-ui@local`). The extension injects chrome-level CSS and
+(MV2, id `vitrina@local`). The extension injects chrome-level CSS and
 rearranges native toolbar widgets to create a Min-browser-like single-bar UI
 with glass aesthetics and dynamic per-site accent colors.
 
@@ -11,20 +11,20 @@ with glass aesthetics and dynamic per-site accent colors.
 
 | File | Role |
 |---|---|
-| `manifest.json` | MV2 + `experiment_apis.minGlass` registration, content script, popup |
+| `manifest.json` | MV2 + `experiment_apis.vitrina` registration, content script, popup |
 | `schema.json` | Experiment API schema: `init`, `setTheme`, `setTabColor`, `setMenuOptions` |
-| `api.js` | Privileged parent-process code: registers `chrome://minglass/content/` chrome mapping to `themes/`, injects USER_SHEET per window, creates all UI widgets, moves native buttons, manages menus/tabs/accent color |
+| `api.js` | Privileged parent-process code: registers `chrome://vitrina/content/` chrome mapping to `themes/`, injects USER_SHEET per window, creates all UI widgets, moves native buttons, manages menus/tabs/accent color |
 | `background.js` | Thin bridge: storage <-> experiment API, message router (THEME_COLOR / SWITCH_THEME / SET_MENU_OPTIONS) |
 | `content-script.js` | Reads `<meta name="theme-color">` from every page, reports changes via runtime messages |
 | `popup/popup.{html,js}` | Theme picker (2 hardcoded buttons) + 2 checkboxes (always-show left/right menus) |
-| `themes/min-glass.css` | 1252 lines, main theme (identical copy deployed as `profile/chrome/userChrome.css`) |
+| `themes/vitrina.css` | 1252 lines, main theme (identical copy deployed as `profile/chrome/userChrome.css`) |
 | `themes/bw-gloss.css` | 450 lines, secondary B/W theme |
 
 ### Deployment
-`min-glass-ui.xpi` is installed in the profile (`extensions/min-glass-ui@local.xpi`),
+`vitrina.xpi` is installed in the profile (`extensions/vitrina@local.xpi`),
 `xpinstall.signatures.required=false` set in user.js. After every code edit the
 xpi must be repacked manually. `userChrome.css` is a stale duplicate of
-min-glass.css (legacy stylesheet pref is NOT enabled in user.js, so it is inert —
+vitrina.css (legacy stylesheet pref is NOT enabled in user.js, so it is inert —
 can be deleted).
 
 ### Runtime behavior (api.js)
@@ -85,7 +85,7 @@ can be deleted).
 ### Phase 0 — hygiene
 - Delete stale `profile/chrome/userChrome.css` (+ .bak) or stop syncing; single
   source of truth = extension themes.
-- Add `build.sh` (or npm script): zip min-extension -> xpi, copy to profile
+- Add `build.sh` (or npm script): zip extension -> xpi, copy to profile
   extensions dir, print restart note.
 - Translate all comments to English.
 
