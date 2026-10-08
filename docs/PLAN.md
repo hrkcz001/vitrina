@@ -18,14 +18,14 @@ Conventions:
 
 ## PHASE 0 — Hygiene (one-time)
 
-### P0.1 Delete stale profile userChrome
+### P0.1 [DONE] Delete stale profile userChrome
 Path: `C:/Users/hrkcz001/scoop/persist/firefox-developer/profile/chrome/userChrome.css`
 Action: delete `userChrome.css` and `userChrome.css.bak`.
 Rationale: it is a byte-identical duplicate of the old ink theme; legacy
 stylesheet pref is off so it is inert, but it confuses debugging.
 Verify: file absent; extension still renders after Firefox restart.
 
-### P0.2 Scoop manifest: fix autoupdate URL template
+### P0.2 [DONE] Scoop manifest: fix autoupdate URL template
 File: `scoop/buckets/personal/bucket/vitrina.json`
 Bug: autoupdate url uses `v$version-vitrina` (wrong order for `checkver: github`).
 Fix: release tags are `vX.Y.Z-vitrina`; keep `checkver.github` pointing at the
@@ -36,7 +36,7 @@ repo, and set:
 This already matches current tags. Just double-check `checkver` regex works with
 `sed`-style `$version`. No code change needed; verify with `scoop checkver vitrina`.
 
-### P0.3 Translate all comments to English
+### P0.3 [DONE] Translate all comments to English
 Files with Russian comments: `extension/api.js` (29 lines), `background.js` (1),
 `content-script.js` (3), `popup/popup.html` (5), `themes/gloss.css` (41),
 `themes/ink.css` (66).
@@ -53,7 +53,7 @@ Action: `rmdir` (or after next reboot). Not blocking anything.
 
 ## PHASE 1 — Bug fixes (no architecture change)
 
-### P1.1 Fix movedPinned duplicate accumulation (api.js)
+### P1.1 [DONE] Fix movedPinned duplicate accumulation (api.js)
 Problem: `updatePinnedExtensions` pushes to `movedPinned` on every observer
 fire for elements already in `pinnedDeck`, duplicating restore entries.
 Fix: track moved elements in a `Set` (or check `movedPinned.some(e => e.el === topEl)`)
@@ -62,14 +62,14 @@ Files: `extension/api.js`, function `updatePinnedExtensions`.
 Verify: switch between 1 and 3+ pinned extensions several times; disable
 extension -> all native buttons restored once, none duplicated.
 
-### P1.2 Fix flyout-open class leak (api.js)
+### P1.2 [DONE] Fix flyout-open class leak (api.js)
 Problem: `toggleRightFlyout` adds `flyout-open` to `#PanelUI-button`; cleanup
 never removes it.
 Fix: in the `cleanup` object returned by `setupMenus`, add
 `panelBtn?.classList.remove("flyout-open")`.
 Verify: uninstall/reload extension; `#PanelUI-button` has no stale classes.
 
-### P1.3 De-duplicate JS/CSS geometry constants
+### P1.3 [DONE] De-duplicate JS/CSS geometry constants
 Current: hardcoded `y > 115`, `x > leftRect.right + 110`, `x < leftRect.left - 40`,
 pinned button width 28px, flyout widths 112px/84px.
 Plan:
@@ -85,7 +85,7 @@ Files: `extension/api.js`, `themes/ink.css` (add vars).
 Verify: change `--mg-close-threshold-y` in CSS to 60 -> menu closes sooner on
 mouse leave; no regressions.
 
-### P1.4 ensureWidgets vs moved widgets race (api.js)
+### P1.4 [DONE] ensureWidgets vs moved widgets race (api.js)
 Problem: `ensureWidgets` calls `addWidgetToArea(AREA_NAVBAR)` for buttons that
 `setupMenus` later relocates into flyouts. CustomizableUI can pull them back.
 Fix:
@@ -103,7 +103,7 @@ Fix:
 Files: `extension/api.js` `ensureWidgets`.
 Verify: open Customize mode, close it; buttons stay in flyouts, no duplicates.
 
-### P1.5 Gloss theme: stop breaking injected widgets
+### P1.5 [DONE] Gloss theme: stop breaking injected widgets
 Short-term (before Phase 2): add a small compat block to `themes/gloss.css`
 that styles `#min-control-box`, `#min-nav-flyout`, `#min-right-flyout`,
 `#min-pinned-deck` in monochrome, mirroring the ink structure but with
@@ -112,7 +112,7 @@ properly with `_base.css` + `themes/gloss/theme.css`.
 Files: `themes/gloss.css`.
 Verify: switch to gloss; left/right menus open, pinned extensions visible.
 
-### P1.6 Content-script: also report on navigation without head mutation
+### P1.6 [DONE] Content-script: also report on navigation without head mutation
 Edge case: some SPAs update `meta[name=theme-color]` via attribute change on
 existing node — already covered by MutationObserver attributes. But if the
 `<head>` is re-created (rare), observer dies. Add a `documentElement`
