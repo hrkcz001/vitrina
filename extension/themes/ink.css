@@ -887,7 +887,8 @@ browser {
 #urlbar-container:has(.searchmode-switcher-dropmarker[open]),
 :root:has(.searchmode-switcher-panel[open]) #urlbar-container,
 :root:has(#searchmode-switcher-popup[open]) #urlbar-container {
-    width: calc(100vw - var(--right-gap)) !important;
+    left: var(--left-menu-width) !important;
+    width: calc(100vw - var(--left-menu-width) - var(--tabs-right-padding)) !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     z-index: 120 !important;
@@ -923,12 +924,21 @@ browser {
     --urlbar-background-border-radius: 8px !important;
     --urlbar-background-border-top-radius-open: 8px !important;
     --urlbarView-row-border-radius: 6px !important;
+    --urlbarView-favicon-width: 14px !important;
+    --urlbarView-rich-suggestion-default-icon-size: 24px !important;
+    --urlbarView-result-button-size: 22px !important;
+    --urlbarView-item-block-padding: 4px !important;
+    --urlbarView-item-inline-padding: 8px !important;
+    --urlbarView-results-padding: 3px !important;
+    --urlbarView-row-gutter: 1px !important;
 }
 
 #urlbar {
     --urlbar-height: var(--bar-height) !important;
     --urlbar-min-height: var(--bar-height) !important;
     --urlbar-container-height: var(--bar-height) !important;
+    --urlbarView-hover-background: transparent !important;
+    --urlbarView-highlight-background: transparent !important;
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 8px !important;
@@ -953,7 +963,27 @@ browser {
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.45),
         inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 0 6px color-mix(in srgb, var(--site-accent, #1c1c22) 65%, rgba(255, 255, 255, 0.4)),
         0 6px 22px rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Open (results shown): match the focused look, drop the native arrowpanel border,
+   and add the accent glow that bleeds past the panel edges. */
+#urlbar[open] > .urlbar-background {
+    background: rgba(14, 14, 18, 0.72) !important;
+    backdrop-filter: blur(18px) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 0 14px color-mix(in srgb, var(--site-accent, #1c1c22) 60%, transparent),
+        0 6px 22px rgba(0, 0, 0, 0.75) !important;
+    outline: none !important;
+}
+
+/* The view carries a native 1px inline border — remove it (extra frame on open). */
+.urlbarView {
+    border-inline: none !important;
 }
 
 #urlbar-input {
@@ -1025,8 +1055,8 @@ browser {
 
 .urlbarView-row-inner {
     border-radius: 6px !important;
-    padding-block: 6px !important;
-    padding-inline: 10px !important;
+    padding-block: 4px !important;
+    padding-inline: 8px !important;
     margin: 1px 4px !important;
     border: 1px solid transparent !important;
     transition: background 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out !important;
