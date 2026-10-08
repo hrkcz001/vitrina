@@ -297,6 +297,9 @@ this.vitrina = class extends ExtensionAPI {
       }
     }
 
+    // Set while the gear programmatically opens the native app menu, so the
+    // hamburger-click suppressor lets that click through.
+    let openingAppMenu = false;
     const settingsBtn = doc.createXULElement ? doc.createXULElement("toolbarbutton") : doc.createElement("button");
     settingsBtn.id = "min-settings-btn";
     settingsBtn.className = "toolbarbutton-1";
@@ -310,9 +313,17 @@ this.vitrina = class extends ExtensionAPI {
     settingsBtn.addEventListener("click", e => {
       e.preventDefault();
       e.stopPropagation();
+      // Open the native app menu directly. Going through menuBtn.click() would
+      // be swallowed by the hamburger-click suppressor below.
+      if (win.PanelUI && typeof win.PanelUI.show === "function") {
+        win.PanelUI.show();
+        return;
+      }
       const menuBtn = doc.getElementById("PanelUI-menu-button");
       if (menuBtn) {
+        openingAppMenu = true;
         menuBtn.click();
+        openingAppMenu = false;
       }
     });
     rightFlyout.appendChild(settingsBtn);
@@ -380,6 +391,8 @@ this.vitrina = class extends ExtensionAPI {
 
     const onPanelBtnClick = e => {
       if (this.alwaysShowRight) return;
+      // A programmatic open of the native app menu (the gear) must go through.
+      if (openingAppMenu) return;
       // The hamburger opens the flyout, never the native app menu (the gear
       // button inside the flyout serves that). Suppress it in all cases.
       e.preventDefault();
