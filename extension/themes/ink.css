@@ -685,6 +685,7 @@ browser {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    outline: none !important;
     cursor: pointer !important;
     flex: none !important;
     transition: background 0.12s ease-out !important;
@@ -704,6 +705,7 @@ browser {
     padding: 0 !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
+    outline: none !important;
     fill: #ffffff !important;
     color: #ffffff !important;
     background: transparent !important;
@@ -766,6 +768,14 @@ browser {
     transform-origin: left center !important;
 }
 
+#min-pinned-deck .unified-extensions-item-row-wrapper,
+#min-pinned-deck .unified-extensions-item {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
 /* Extension buttons on the deck: full-bar 32px height, hover like window buttons */
 #min-pinned-deck > toolbarbutton,
 #min-pinned-deck > toolbaritem,
@@ -790,6 +800,17 @@ browser {
     /* Let the notification badge overflow the 28x32 button instead of clipping */
     overflow: visible !important;
     transition: background 0.15s ease-out !important;
+}
+
+/* A pinned extension is wrapped in extra containers (e.g.
+   .unified-extensions-item-row-wrapper > toolbarbutton). The badge sits in the
+   deepest button, which ships with overflow:hidden and clips it; open the whole
+   chain. Scoped to descendants so wrapped widgets are covered too. */
+#min-pinned-deck toolbarbutton,
+#min-pinned-deck toolbaritem,
+#min-pinned-deck .unified-extensions-item-row-wrapper,
+#min-pinned-deck .webextension-action {
+    overflow: visible !important;
 }
 
 #min-pinned-deck > toolbarbutton:hover,
