@@ -1,12 +1,15 @@
 "use strict";
 
 /*
- * Сообщает фону цвет страницы из <meta name="theme-color">.
- * Отправляет только при изменении значения, наблюдает только за <head>.
+ * Reports the page color from <meta name="theme-color"> to the background.
+ * Sends only on change and observes only <head>.
  */
 (() => {
   let last = null;
   let timer = 0;
+  let observedHead = null;
+  let headObserver = null;
+  let docObserver = null;
 
   function pick() {
     for (const meta of document.querySelectorAll('meta[name="theme-color" i]')) {
@@ -36,15 +39,34 @@
     timer = setTimeout(report, 150);
   }
 
+  // (Re)bind the <head> MutationObserver. Re-attaches whenever the current head
+  // differs from the one we already observe (some SPAs replace <head>).
+  function observeHead() {
+    const head = document.head;
+    if (!head || head === observedHead) {
+      return;
+    }
+    headObserver?.disconnect();
+    observedHead = head;
+    headObserver = new MutationObserver(schedule);
+    headObserver.observe(head, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["content", "media", "name"],
+    });
+  }
+
   function attach() {
     report();
-    if (document.head) {
-      new MutationObserver(schedule).observe(document.head, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["content", "media", "name"],
+    observeHead();
+    // Safety net: watch the document element so a replaced <head> rebinds.
+    if (!docObserver) {
+      docObserver = new MutationObserver(() => {
+        observeHead();
+        report();
       });
+      docObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
   }
 
@@ -54,6 +76,6 @@
     attach();
   }
 
-  // Сайты с разными theme-color для светлой и тёмной темы.
+  // Sites with different theme-color for light and dark schemes.
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", report);
 })();

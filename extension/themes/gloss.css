@@ -1,47 +1,55 @@
 /*
- * Однострочный чёрно-белый интерфейс.
+ * Single-bar black-and-white interface.
  *
- * Всё живёт в одной полосе высотой --bar-height:
- *   [url] [вкладки ........................] [view] [меню] [_ □ x]
+ * Everything lives in one strip of height --bar-height:
+ *   [url] [tabs ........................] [view] [menu] [_ [] x]
  *
- * nav-bar висит поверх полосы вкладок (position: absolute) и сам по себе
- * прозрачен для мыши. От него видны только адресная строка (свёрнута
- * в квадрат слева) и две кнопки справа. При наведении или фокусе (Ctrl+L)
- * адресная строка разворачивается на всю ширину поверх вкладок.
+ * nav-bar floats over the tab strip (position: absolute) and is mouse-
+ * transparent. Only the URL bar (collapsed to a square on the left) and
+ * two buttons on the right are visible. On hover or focus (Ctrl+L)
+ * the URL bar expands to full width over the tabs.
  *
- * Стиль: только чёрный и белый. Объём даёт глянец с жёстким срезом:
- * сверху белый блик, обрывается резко, ниже чистый чёрный, у дна отсвет.
+ * Style: black and white only. Depth comes from gloss with a hard cut:
+ * white highlight on top, cut sharply, then pure black, a sheen at the bottom.
  */
 
 :root {
     --bar-height: 32px;
     --btn-width: 32px;
-    --right-gap: calc(var(--btn-width) * 5); /* view + меню + 3 кнопки окна */
+    --right-gap: calc(var(--btn-width) * 5); /* view + menu + 3 window buttons */
     --radius: 4px;
+
+    /* Geometry tokens consumed by JS (api.js cssPx) - one source of truth */
+    --mg-close-threshold-y: 115px;
+    --mg-close-margin-x: 110px;
+    --mg-close-margin-x-near: 40px;
+    --mg-pinned-btn-width: 28px;
+    --flyout-btn-width: 28px;
+    --right-menu-width: 136px;
 
     --c-fg: #fff;
     --c-dim: rgba(255, 255, 255, 0.55);
     --c-ring: rgba(255, 255, 255, 0.85);
 
-    /* Фон полосы: чёрный, лёгкий блик сверху и косая штриховка */
+    /* Bar background: black, a light top highlight and diagonal hatching */
     --g-bar:
         repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 6px),
         linear-gradient(#262626 0%, #050505 50%, #000 100%);
 
-    /* Глянец с жёстким срезом: блик → обрыв → чёрный → отсвет у дна */
+    /* Gloss with a hard cut: highlight -> cut -> black -> sheen at the bottom */
     --g-gloss:
         linear-gradient(#fff 0%, #8c8c8c 32%, #000 33%, #000 68%, #3a3a3a 100%);
     --g-gloss-dim:
         linear-gradient(#5a5a5a 0%, #1c1c1c 32%, #000 33%, #000 68%, #1c1c1c 100%);
-    /* Инверсия: белая кнопка с чёрным низом-тенью */
+    /* Inversion: white button with a black bottom shadow */
     --g-inverse:
         linear-gradient(#fff 0%, #fff 45%, #cfcfcf 46%, #fff 100%);
 
-    /* Подсветка закладок — оставлена как была */
+    /* Bookmark highlight - kept as it was */
     --g-hover: linear-gradient(#2e2e2e, #222222);
     --hl-top: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
-    /* Глушим цвета тем Firefox */
+    /* Mute Firefox theme colors */
     --tab-min-height: var(--bar-height) !important;
     --lwt-accent-color: #000 !important;
     --lwt-text-color: #fff !important;
@@ -62,7 +70,7 @@
 }
 
 
-/* ---------- Каркас ---------- */
+/* ---------- Frame ---------- */
 
 #navigator-toolbox {
     background: var(--g-bar) !important;
@@ -83,7 +91,7 @@
     margin: 0 !important;
 }
 
-/* nav-bar накладывается на полосу вкладок и не ловит клики сам */
+/* nav-bar overlays the tab strip and does not catch clicks itself */
 #nav-bar {
     position: absolute !important;
     inset: 0 0 auto 0 !important;
@@ -96,7 +104,7 @@
 }
 
 
-/* ---------- Лишнее ---------- */
+/* ---------- Extras ---------- */
 
 #nav-bar .titlebar-buttonbox-container,
 #nav-bar-customization-target > :not(#urlbar-container, #PanelUI-button, #firefox-view-button),
@@ -109,9 +117,9 @@
 }
 
 
-/* ---------- Кнопки справа ---------- */
+/* ---------- Right-side buttons ---------- */
 
-/* Кнопки окна (свернуть / развернуть / закрыть) */
+/* Window buttons (minimize / maximize / close) */
 #TabsToolbar .titlebar-buttonbox-container {
     display: flex !important;
     position: absolute !important;
@@ -122,8 +130,8 @@
 }
 
 /*
- * Без скругления: Gecko учитывает border-radius при попадании мышью,
- * и со скруглением угол экрана «мимо» крестика.
+ * No rounding: Gecko takes border-radius into account for hit-testing,
+ * so a rounded corner would miss the close button at the screen corner.
  */
 .titlebar-button {
     width: var(--btn-width) !important;
@@ -143,7 +151,7 @@
     color: #000 !important;
 }
 
-/* Меню и Firefox View — левее кнопок окна */
+/* Menu and Firefox View - left of the window buttons */
 #PanelUI-button,
 #firefox-view-button {
     position: absolute !important;
@@ -184,9 +192,9 @@
 }
 
 
-/* ---------- Адресная строка ---------- */
+/* ---------- URL bar ---------- */
 
-/* В покое — квадрат слева. При наведении/фокусе — на всю ширину поверх вкладок */
+/* At rest a square on the left. On hover/focus - full width over the tabs */
 #urlbar-container {
     position: absolute !important;
     top: 0 !important;
@@ -206,10 +214,10 @@
 }
 
 /*
- * Квадратная строка. Форму в Firefox 157 задают переменные, а не сами
- * элементы: фон строки (.urlbar-background) и нижняя половина списка
- * (.urlbarView-background) берут радиус из них. Обнуляем все.
- * Отступ «вылета» фона при открытом списке тоже убираем.
+ * Square bar. In Firefox 157 the shape is set by variables, not the
+ * elements themselves: the bar background (.urlbar-background) and the
+ * lower half of the list (.urlbarView-background) take the radius from them.
+ * We also remove the background overhang while the list is open.
  */
 #urlbar,
 #urlbar .urlbarView {
@@ -246,7 +254,7 @@
     padding: 0 !important;
 }
 
-/* Свёрнутая — глянцевый квадрат; раскрытая — чистый чёрный */
+/* Collapsed: glossy square; expanded: pure black */
 #urlbar > .urlbar-background {
     background-image: var(--g-gloss-dim) !important;
 }
@@ -274,19 +282,19 @@
     padding-left: 10px !important;
 }
 
-/* Текст скрыт, пока строка свёрнута */
+/* Text hidden while the bar is collapsed */
 #urlbar:not(:hover, [focused]) .urlbar-input {
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
-/* --- Список результатов --- */
+/* --- Results list --- */
 
 .urlbarView-row:not([selected]):hover > .urlbarView-row-inner {
     background: var(--g-gloss-dim) !important;
 }
 
-/* Выбранная строка — инверсия */
+/* Selected row - inversion */
 .urlbarView-row[selected] > .urlbarView-row-inner {
     background: var(--g-inverse) !important;
     color: #000 !important;
@@ -313,19 +321,19 @@
 }
 
 
-/* ---------- Вкладки ---------- */
+/* ---------- Tabs ---------- */
 
 #tabbrowser-tabs {
     --tab-block-margin: 0px !important;
 }
 
-/* Место под квадрат адресной строки слева и кнопки справа */
+/* Room for the URL square on the left and the buttons on the right */
 #TabsToolbar {
     padding-left: var(--btn-width) !important;
     padding-right: var(--right-gap) !important;
 }
 
-/* Вкладки растягиваются на всю ширину */
+/* Tabs stretch to full width */
 .tabbrowser-tab[fadein]:not([pinned]) {
     max-width: 100vw !important;
     flex-grow: 1 !important;
@@ -345,7 +353,7 @@
     background: var(--g-gloss-dim) !important;
 }
 
-/* Активная: белый глянец сверху, обрыв в чёрный, белая обводка */
+/* Active: white gloss on top, cut to black, white outline */
 .tabbrowser-tab[selected] .tab-background {
     background: var(--g-gloss) !important;
     box-shadow: inset 0 0 0 1px var(--c-ring), 0 1px 3px #000 !important;
@@ -378,7 +386,7 @@
     font-weight: 500 !important;
 }
 
-/* Крестик: белый, на ховере — белый квадрат с чёрным крестом */
+/* Close: white; on hover a white square with a black cross */
 .tab-close-button {
     fill: #fff !important;
     color: #fff !important;
@@ -413,7 +421,7 @@
 }
 
 
-/* ---------- Панель закладок ---------- */
+/* ---------- Bookmarks bar ---------- */
 
 #PersonalToolbar {
     background: transparent !important;
@@ -430,7 +438,7 @@
     box-shadow: var(--hl-top) !important;
 }
 
-/* Только иконки; подпись выезжает у той закладки, на которую навели */
+/* Icons only; the label slides in for the hovered bookmark */
 #PlacesToolbarItems > .bookmark-item > .toolbarbutton-text {
     display: block !important;
     max-width: 0 !important;
@@ -442,9 +450,223 @@
     transition: max-width 0.2s ease-out, opacity 0.2s ease-out, margin 0.2s ease-out !important;
 }
 
-/* Только если подпись есть — иначе закладка дёргается на пустом отступе */
+/* Only if a label exists - otherwise the bookmark jumps on empty padding */
 #PlacesToolbarItems > .bookmark-item[label]:not([label=""]):hover > .toolbarbutton-text {
     max-width: 150px !important;
     margin-inline-start: 4px !important;
     opacity: 1 !important;
+}
+
+
+/* ========================================================
+   Injected-widget compatibility (P1.5)
+   ========================================================
+   api.js always creates and populates the Vitrina containers
+   (#min-control-box / #min-nav-flyout / #min-right-flyout /
+   #min-pinned-deck) regardless of theme. This block styles them in the
+   gloss monochrome language so switching to this theme does not break the
+   layout. Phase 2 replaces this with _base.css + a proper gloss/theme.css.
+   Black and white only, no gradients beyond the shared --g-gloss helpers. */
+
+/* Left control button on the deck */
+#min-control-btn {
+    width: var(--btn-width, 32px) !important;
+    height: var(--bar-height, 32px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+
+#min-control-btn:hover {
+    background: var(--g-gloss-dim) !important;
+}
+
+#min-control-btn > .toolbarbutton-icon {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    fill: #fff !important;
+    color: #fff !important;
+}
+
+/* Left flyout capsule */
+#min-nav-flyout {
+    position: absolute !important;
+    top: 2px !important;
+    bottom: 2px !important;
+    left: 4px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    background: #000 !important;
+    border: 1px solid var(--c-dim) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    z-index: 99999 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+#min-control-box.nav-open #min-nav-flyout,
+:root[left-menu-open="true"] #min-nav-flyout {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+:root[always-show-left-menu="true"] #min-control-btn {
+    display: none !important;
+}
+
+:root[always-show-left-menu="true"] #min-nav-flyout {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+#min-nav-flyout > toolbarbutton,
+#min-nav-flyout #stop-reload-button,
+#min-nav-flyout #reload-button,
+#min-nav-flyout #stop-button,
+#min-nav-flyout #back-button,
+#min-nav-flyout #forward-button,
+#min-nav-flyout #developer-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--flyout-btn-width, 28px) !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    fill: #fff !important;
+    color: #fff !important;
+}
+
+#min-nav-flyout > toolbarbutton:hover,
+#min-nav-flyout #reload-button:hover,
+#min-nav-flyout #back-button:hover,
+#min-nav-flyout #forward-button:hover,
+#min-nav-flyout #developer-button:hover {
+    background: var(--g-gloss-dim) !important;
+}
+
+#min-nav-flyout .toolbarbutton-icon {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    fill: #fff !important;
+    color: #fff !important;
+    -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
+}
+
+/* Right flyout capsule (view + extensions + gear) */
+#min-right-flyout {
+    position: absolute !important;
+    top: 2px !important;
+    bottom: 2px !important;
+    right: calc(var(--btn-width) * 3 + 4px) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    background: #000 !important;
+    border: 1px solid var(--c-dim) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    z-index: 99998 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+#min-right-flyout.open,
+:root[right-menu-open="true"] #min-right-flyout {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+:root[always-show-right-menu="true"] #min-right-flyout {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+#min-right-flyout > toolbarbutton {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--flyout-btn-width, 28px) !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    fill: #fff !important;
+    color: #fff !important;
+}
+
+#min-right-flyout > toolbarbutton:hover {
+    background: var(--g-gloss-dim) !important;
+}
+
+#min-right-flyout .toolbarbutton-icon {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    fill: #fff !important;
+    color: #fff !important;
+    -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
+}
+
+/* Pinned extensions deck */
+#min-pinned-deck {
+    position: absolute !important;
+    top: 0 !important;
+    height: var(--bar-height, 32px) !important;
+    right: var(--right-menu-width, 136px) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    pointer-events: auto !important;
+    z-index: 101 !important;
+}
+
+#min-pinned-deck > toolbarbutton,
+#min-pinned-deck > toolbaritem,
+#min-pinned-deck .webextension-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--mg-pinned-btn-width, 28px) !important;
+    height: var(--bar-height, 32px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#min-pinned-deck > toolbarbutton:hover,
+#min-pinned-deck > toolbaritem:hover,
+#min-pinned-deck .webextension-action:hover {
+    background: var(--g-gloss-dim) !important;
+}
+
+#min-pinned-deck .toolbarbutton-icon {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    fill: #fff !important;
+    color: #fff !important;
+    -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
 }

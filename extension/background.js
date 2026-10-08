@@ -5,7 +5,7 @@ const DEFAULT_THEME = "ink";
 async function start() {
   const { activeTheme, alwaysShowLeftMenu, alwaysShowRightMenu } =
     await browser.storage.local.get(["activeTheme", "alwaysShowLeftMenu", "alwaysShowRightMenu"]);
-  // Тема передаётся сразу, чтобы при старте не мелькала тема по умолчанию.
+  // Pass the theme immediately so the default theme does not flash on start.
   await browser.vitrina.init(activeTheme || DEFAULT_THEME);
   await browser.vitrina.setMenuOptions(!!alwaysShowLeftMenu, !!alwaysShowRightMenu);
 }

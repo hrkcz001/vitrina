@@ -1,11 +1,11 @@
 "use strict";
 
 /*
- * Привилегированная часть расширения (WebExtension Experiment).
- * Выполняется в родительском процессе со всеми правами браузера.
+ * Privileged part of the extension (WebExtension Experiment).
+ * Runs in the parent process with full browser privileges.
  *
- * ExtensionAPI, Services, Cc, Ci, ChromeUtils уже есть в песочнице,
- * в которую Firefox загружает этот файл, — импортировать их не нужно.
+ * ExtensionAPI, Services, Cc, Ci, ChromeUtils already exist in the sandbox
+ * Firefox loads this file into, so no imports are needed.
  */
 
 /* global ExtensionAPI, Services, Cc, Ci, ChromeUtils */
@@ -20,7 +20,20 @@ const THEMES = {
 const DEFAULT_THEME = "ink";
 const DEFAULT_ACCENT = "#1c1c22";
 
-// Подобранные вручную цвета для частых сайтов; остальные — по хэшу домена.
+// Widget ids that Vitrina relocates. Kept in one place so ensureWidgets and
+// setupMenus never drift apart.
+const LEFT_WIDGET_IDS = ["stop-reload-button", "back-button", "forward-button", "developer-button"];
+const RIGHT_WIDGET_IDS = ["firefox-view-button", "unified-extensions-button"];
+const ALL_MANAGED_WIDGET_IDS = [...LEFT_WIDGET_IDS, ...RIGHT_WIDGET_IDS];
+
+// IDs of the container elements Vitrina injects; a managed widget is
+// "already moved" when its closest of these is not null.
+const MANAGED_CONTAINERS = ["min-nav-flyout", "min-right-flyout", "min-pinned-deck"];
+
+// Fallbacks for geometry tokens (see themes docs). Overridden by CSS vars.
+const FALLBACK = { closeY: 115, closeMarginX: 110, closeMarginXNear: 40, pinnedBtnWidth: 28 };
+
+// Hand-picked colors for common sites; the rest come from a domain hash.
 const PALETTE = {
   "github.com": "#24292e",
   "youtube.com": "#cc181e",
@@ -68,10 +81,22 @@ function domainColor(host) {
   return `hsl(${hue}, 65%, 38%)`;
 }
 
+// Read a numeric geometry token from :root custom properties, falling back to
+// the hardcoded default so JS and CSS stay in sync via one source (P1.3).
+function cssPx(win, prop, fallback) {
+  try {
+    const raw = win.getComputedStyle(win.document.documentElement).getPropertyValue(prop);
+    const val = parseFloat(raw);
+    return Number.isFinite(val) ? val : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
 this.vitrina = class extends ExtensionAPI {
   getAPI(_context) {
-    // getAPI вызывается для каждого контекста (фон, попап), поэтому всё
-    // состояние живёт в самом экземпляре API, а не здесь.
+    // getAPI is called per context (background, popup), so all state lives
+    // on the API instance itself, not here.
     return {
       vitrina: {
         init: async theme => this.start(theme),
@@ -91,7 +116,7 @@ this.vitrina = class extends ExtensionAPI {
     this.theme = THEMES[theme] ? theme : DEFAULT_THEME;
     this.windows = new Map();
 
-    // chrome://vitrina/content/ -> папка themes/ внутри расширения.
+    // chrome://vitrina/content/ -> the themes/ folder inside the extension.
     const aomStartup = Cc["@mozilla.org/addons/addon-manager-startup;1"]
       .getService(Ci.amIAddonManagerStartup);
     const manifestURI = Services.io.newURI("manifest.json", null, this.extension.rootURI);
@@ -105,7 +130,7 @@ this.vitrina = class extends ExtensionAPI {
       }
     }
 
-    // Новые окна: срабатывает, когда gBrowser и вкладки уже готовы.
+    // New windows: fires once gBrowser and the tabs are ready.
     this.windowObserver = win => this.setupWindow(win);
     Services.obs.addObserver(this.windowObserver, "browser-delayed-startup-finished");
   }
@@ -115,8 +140,8 @@ this.vitrina = class extends ExtensionAPI {
   }
 
   /*
-   * Стили подключаются к каждому окну отдельно (windowUtils), а не глобально
-   * через nsIStyleSheetService: глобальный лист попадает и во все сайты.
+   * Styles are attached per window (windowUtils), not globally via
+   * nsIStyleSheetService: a global sheet would leak into every website too.
    */
   applyTheme(theme) {
     if (!THEMES[theme] || theme === this.theme) {
@@ -142,11 +167,26 @@ this.vitrina = class extends ExtensionAPI {
     }
   }
 
+  // Returns true if the given widget id is already living inside one of the
+  // containers Vitrina injects (so it must not be re-placed into the navbar).
+  isWidgetMoved(win, id) {
+    const el = win.document.getElementById(id);
+    if (!el) {
+      return false;
+    }
+    return MANAGED_CONTAINERS.some(cid => el.closest(`#${cid}`));
+  }
+
   ensureWidgets(win) {
     try {
       const cui = win.CustomizableUI;
       if (cui) {
-        for (const id of ["stop-reload-button", "back-button", "forward-button", "developer-button", "firefox-view-button", "unified-extensions-button"]) {
+        for (const id of ALL_MANAGED_WIDGET_IDS) {
+          // Skip widgets already relocated into our flyouts/deck: forcing them
+          // back into AREA_NAVBAR would fight setupMenus (P1.4).
+          if (this.isWidgetMoved(win, id)) {
+            continue;
+          }
           const placement = cui.getPlacementOfWidget(id);
           if (!placement || placement.area !== cui.AREA_NAVBAR) {
             cui.addWidgetToArea(id, cui.AREA_NAVBAR);
@@ -175,7 +215,7 @@ this.vitrina = class extends ExtensionAPI {
       switcher.removeAttribute("title");
     }
 
-    // 1. ЛЕВОЕ МЕНЮ
+    // 1. LEFT MENU
     const controlBox = doc.createXULElement ? doc.createXULElement("hbox") : doc.createElement("div");
     controlBox.id = "min-control-box";
 
@@ -185,7 +225,7 @@ this.vitrina = class extends ExtensionAPI {
 
     const controlIcon = doc.createXULElement ? doc.createXULElement("image") : doc.createElement("img");
     controlIcon.className = "toolbarbutton-icon";
-    // Лаконичная векторная иконка управления (слайдеры / control center)
+    // Clean vector control icon (sliders / control center)
     const controlSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round'><path d='M2.5 4h11M2.5 8h11M2.5 12h11'/><circle cx='5.5' cy='4' r='1.2' fill='white'/><circle cx='10.5' cy='8' r='1.2' fill='white'/><circle cx='6.5' cy='12' r='1.2' fill='white'/></svg>";
     controlIcon.setAttribute("src", controlSvg);
     controlIcon.style.listStyleImage = `url("${controlSvg}")`;
@@ -195,12 +235,12 @@ this.vitrina = class extends ExtensionAPI {
     const leftFlyout = doc.createXULElement ? doc.createXULElement("hbox") : doc.createElement("div");
     leftFlyout.id = "min-nav-flyout";
 
-    // Переносим НАСТОЯЩИЕ нативные кнопки Firefox: Обновить, Назад, Вперёд, Инструменты разработчика
+    // Move the REAL native Firefox buttons: reload, back, forward, developer tools
     const movedLeft = [];
-    const leftBtnIds = ["stop-reload-button", "back-button", "forward-button", "developer-button"];
-    for (const id of leftBtnIds) {
+    for (const id of LEFT_WIDGET_IDS) {
       const el = doc.getElementById(id) || win.CustomizableUI?.getWidget(id)?.forWindow(win)?.node;
       if (el) {
+        el.setAttribute("data-vitrina-moved", "1");
         movedLeft.push({ el, parent: el.parentNode, next: el.nextSibling });
         leftFlyout.appendChild(el);
       }
@@ -226,7 +266,7 @@ this.vitrina = class extends ExtensionAPI {
       }
     };
 
-    // Открытие левого меню строго по ЛКМ
+    // Open the left menu only on left-click
     const onControlClick = e => {
       if (e.button === 0) {
         e.preventDefault();
@@ -243,15 +283,15 @@ this.vitrina = class extends ExtensionAPI {
     controlBtn.addEventListener("click", onControlClick);
     controlBtn.addEventListener("contextmenu", onControlContextMenu);
 
-    // 2. ПРАВОЕ МЕНЮ
+    // 2. RIGHT MENU
     const rightFlyout = doc.createXULElement ? doc.createXULElement("hbox") : doc.createElement("div");
     rightFlyout.id = "min-right-flyout";
 
     const movedRight = [];
-    const rightBtnIds = ["firefox-view-button", "unified-extensions-button"];
-    for (const id of rightBtnIds) {
+    for (const id of RIGHT_WIDGET_IDS) {
       const el = doc.getElementById(id) || win.CustomizableUI?.getWidget(id)?.forWindow(win)?.node;
       if (el) {
+        el.setAttribute("data-vitrina-moved", "1");
         movedRight.push({ el, parent: el.parentNode, next: el.nextSibling });
         rightFlyout.appendChild(el);
       }
@@ -337,7 +377,7 @@ this.vitrina = class extends ExtensionAPI {
     const onPopupHidden = () => toggleRightFlyout(false);
     appPopup?.addEventListener("popuphidden", onPopupHidden);
 
-    // 3. ЗАКРЫТИЕ ПО КЛИКУ ВНЕ МЕНЮ (клик на кнопки меню НЕ закрывает меню!)
+    // 3. CLOSE ON CLICK OUTSIDE (a click on the menu buttons does NOT close it!)
     const onDocClick = e => {
       if (e.target.closest?.(".searchmode-switcher-panel, #searchmode-switcher-popup, .searchmode-switcher, #urlbar, .urlbarView, #urlbar-container")) {
         return;
@@ -351,7 +391,7 @@ this.vitrina = class extends ExtensionAPI {
     };
     doc.addEventListener("click", onDocClick, true);
 
-    // 4. ЗАКРЫТИЕ ПРИ ДАЛЁКОМ УВОДЕ КУРСОРА (far away)
+    // 4. CLOSE WHEN THE CURSOR MOVES FAR AWAY
     const onDocMouseMove = e => {
       const isLeftOpen = !this.alwaysShowLeft && controlBox.classList.contains("nav-open");
       const isRightOpen = !this.alwaysShowRight && rightOpen;
@@ -359,8 +399,11 @@ this.vitrina = class extends ExtensionAPI {
 
       const x = e.clientX;
       const y = e.clientY;
+      const closeY = cssPx(win, "--mg-close-threshold-y", FALLBACK.closeY);
+      const marginX = cssPx(win, "--mg-close-margin-x", FALLBACK.closeMarginX);
+      const marginNear = cssPx(win, "--mg-close-margin-x-near", FALLBACK.closeMarginXNear);
 
-      if (y > 115) {
+      if (y > closeY) {
         if (isLeftOpen) toggleLeftFlyout(false);
         if (isRightOpen) toggleRightFlyout(false);
         return;
@@ -368,7 +411,7 @@ this.vitrina = class extends ExtensionAPI {
 
       if (isLeftOpen) {
         const leftRect = leftFlyout.getBoundingClientRect();
-        if (x > leftRect.right + 110 || x < leftRect.left - 40) {
+        if (x > leftRect.right + marginX || x < leftRect.left - marginNear) {
           toggleLeftFlyout(false);
         }
       }
@@ -376,15 +419,16 @@ this.vitrina = class extends ExtensionAPI {
       if (isRightOpen) {
         const rightRect = rightFlyout.getBoundingClientRect();
         const panelRect = panelBtn ? panelBtn.getBoundingClientRect() : rightRect;
-        if (x < rightRect.left - 110 || x > panelRect.right + 40) {
+        if (x < rightRect.left - marginX || x > panelRect.right + marginNear) {
           toggleRightFlyout(false);
         }
       }
     };
     doc.addEventListener("mousemove", onDocMouseMove);
 
-    // 5. ЗАКРЕПЛЁННЫЕ РАСШИРЕНИЯ (PINNED EXTENSIONS DECK)
+    // 5. PINNED EXTENSIONS DECK
     const movedPinned = [];
+    const movedPinnedSet = new Set();
     const updatePinnedExtensions = () => {
       const target = doc.getElementById("nav-bar-customization-target");
       if (!target) return;
@@ -396,14 +440,16 @@ this.vitrina = class extends ExtensionAPI {
         while (topEl.parentNode && topEl.parentNode !== target && topEl.parentNode !== pinnedDeck) {
           topEl = topEl.parentNode;
         }
-        if (topEl.parentNode === target) {
+        if (topEl.parentNode === target && !movedPinnedSet.has(topEl)) {
+          movedPinnedSet.add(topEl);
+          topEl.setAttribute("data-vitrina-moved", "1");
           movedPinned.push({ el: topEl, parent: target, next: topEl.nextSibling });
           pinnedDeck.appendChild(topEl);
         }
       }
 
       const count = pinnedDeck.children.length;
-      const width = count * 28;
+      const width = count * FALLBACK.pinnedBtnWidth;
       doc.documentElement.style.setProperty("--pinned-extensions-width", `${width}px`);
       if (count > 0) {
         doc.documentElement.setAttribute("has-pinned-extensions", "true");
@@ -456,14 +502,20 @@ this.vitrina = class extends ExtensionAPI {
         appPopup?.removeEventListener("popuphidden", onPopupHidden);
 
         for (const { el, parent, next } of movedLeft) {
+          el.removeAttribute("data-vitrina-moved");
           if (parent) parent.insertBefore(el, next);
         }
         for (const { el, parent, next } of movedRight) {
+          el.removeAttribute("data-vitrina-moved");
           if (parent) parent.insertBefore(el, next);
         }
         for (const { el, parent, next } of movedPinned) {
+          el.removeAttribute("data-vitrina-moved");
           if (parent) parent.insertBefore(el, next);
         }
+
+        // Remove the flyout-open class the right flyout may have left behind (P1.2).
+        panelBtn?.classList.remove("flyout-open");
 
         controlBox.remove();
         rightFlyout.remove();
@@ -493,8 +545,8 @@ this.vitrina = class extends ExtensionAPI {
       updateMenuOptions(this.alwaysShowLeft, this.alwaysShowRight);
     }
 
-    // Клик по уже активной вкладке открывает адресную строку (как в Min).
-    // На mousedown вкладка ещё не переключилась — запоминаем её состояние.
+    // Clicking the already-active tab focuses the URL bar (Min behavior).
+    // On mousedown the tab has not switched yet, so we remember its state.
     let wasSelected = false;
     const onMouseDown = e => {
       const tab = e.button === 0 ? e.target.closest?.(".tabbrowser-tab") : null;
@@ -509,13 +561,13 @@ this.vitrina = class extends ExtensionAPI {
         return;
       }
       if (e.target.closest?.(".tabbrowser-tab")?.selected) {
-        // После обработчиков самой вкладки, чтобы фокус не перехватили.
+        // After the tab's own handlers, so the focus is not stolen.
         win.setTimeout(() => win.gURLBar.select(), 0);
       }
     };
     const onTabSelect = () => this.refresh(win);
 
-    // Переход по ссылке в активной вкладке — пересчитать цвет.
+    // In-tab navigation — recompute the accent color.
     const progressListener = {
       onLocationChange: (webProgress, _request, _location, flags) => {
         if (webProgress.isTopLevel && !(flags & Ci.nsIWebProgressListener.LOCATION_CHANGE_SAME_DOCUMENT)) {
@@ -548,7 +600,7 @@ this.vitrina = class extends ExtensionAPI {
     this.refresh(win);
   }
 
-  /* Цвет из <meta name="theme-color">, присланный content-script'ом. */
+  /* Color from <meta name="theme-color">, sent by the content script. */
   setTabColor(tabId, color) {
     let nativeTab;
     try {
@@ -559,7 +611,7 @@ this.vitrina = class extends ExtensionAPI {
     const win = nativeTab.ownerGlobal;
     const valid = color && color.length < 64 && win.CSS.supports("color", color);
     nativeTab._vitrinaColor = valid ? color : "";
-    // Запоминаем домен: при переходе на другой сайт старый цвет не применится.
+    // Remember the domain so a stale color is not applied on navigation.
     nativeTab._vitrinaHost = hostOf(nativeTab.linkedBrowser?.currentURI);
     if (nativeTab.selected && this.windows.has(win)) {
       this.refresh(win);
@@ -572,7 +624,7 @@ this.vitrina = class extends ExtensionAPI {
       const uri = win.gBrowser.selectedBrowser?.currentURI || tab?.linkedBrowser?.currentURI;
       const spec = uri?.spec || "";
 
-      // Скрываем звёздочку избранного на домашней странице и внутренних вкладках about:*
+      // Hide the bookmark star on the home page and about:* internal tabs
       const starBox = win.document.getElementById("star-button-box");
       if (starBox) {
         if (spec.startsWith("about:") || !spec) {
@@ -602,7 +654,7 @@ this.vitrina = class extends ExtensionAPI {
     this.windows.clear();
     this.chromeHandle.destruct();
     this.chromeHandle = null;
-    // Иначе после обновления расширения Firefox может отдать старый CSS из кэша.
+    // Otherwise Firefox may serve stale CSS from cache after an update.
     Services.obs.notifyObservers(null, "startupcache-invalidate");
   }
 };

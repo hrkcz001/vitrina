@@ -21,19 +21,25 @@
     --flyout-btn-width: 28px !important;
     --right-gap: 136px !important;
     --tab-radius: 5px !important;
-    --site-accent: #1c1c22; /* Дефолтный глубокий тёмный чернильный оттенок */
+    --site-accent: #1c1c22; /* Default deep dark ink shade */
 
-    /* Динамическая ширина левого и правого меню для сжатия пространства вкладок */
-    /* В покое: кнопка 28px + left 4px + зазор 8px = 40px; справа: кнопки 96px + гамбургер 28px + right 4px + зазор 8px = 136px */
+    /* Geometry tokens consumed by JS (api.js cssPx) so numbers live in one place */
+    --mg-close-threshold-y: 115px;
+    --mg-close-margin-x: 110px;
+    --mg-close-margin-x-near: 40px;
+    --mg-pinned-btn-width: 28px;
+
+    /* Dynamic left/right menu width to compress the tab strip */
+    /* At rest: button 28px + left 4px + gap 8px = 40px; right: buttons 96px + hamburger 28px + right 4px + gap 8px = 136px */
     --left-menu-width: 40px !important;
     --right-menu-width: 136px !important;
 
-    /* Закреплённые расширения и динамический отступ для панели вкладок */
+    /* Pinned extensions and dynamic padding for the tab strip */
     --pinned-extensions-width: 0px;
     --pinned-gap: 0px;
     --tabs-right-padding: calc(var(--right-menu-width) + var(--pinned-extensions-width) + var(--pinned-gap)) !important;
 
-    /* Глушим дефолтные темы и цвета Firefox */
+    /* Mute default Firefox themes and colors */
     --tab-min-height: var(--bar-height) !important;
     --lwt-accent-color: transparent !important;
     --lwt-text-color: #fff !important;
@@ -45,10 +51,10 @@
     --toolbar-field-background-color: transparent !important;
     --toolbar-field-focus-background-color: transparent !important;
 
-    /* Убиваем радужную градиентную полоску в меню настроек */
+    /* Kill the rainbow gradient stripe in the settings menu */
     --panel-separator-zap-gradient: rgba(255, 255, 255, 0.15) !important;
 
-    /* Полное устранение разделителей (1px) и рамок контента */
+    /* Fully remove 1px separators and content borders */
     --chrome-content-separator-color: transparent !important;
     --content-area-shadow: none !important;
     --card-box-shadow: none !important;
@@ -65,7 +71,7 @@
     --tabs-right-padding: calc(var(--right-menu-width) + var(--pinned-extensions-width) + 8px) !important;
 }
 
-/* Динамические размеры отступов при открытии меню или фиксации (с гарантированным зазором 8px до вкладок) */
+/* Dynamic padding when a menu opens or is pinned (always 8px gap to the tabs) */
 :root[left-menu-open="true"],
 :root[always-show-left-menu="true"] {
     --left-menu-width: 124px !important;
@@ -78,22 +84,22 @@
 }
 
 /* ========================================================
-   1. КАРКАС: СТЕКЛО И ТУШЬ (БЕЗ ДЕФОЛТНОЙ СИНЕВЫ)
+   1. FRAME: GLASS AND INK (NO DEFAULT BLUE)
    ======================================================== */
 
 #navigator-toolbox {
     background-color: color-mix(in srgb, var(--site-accent, #1c1c22) 18%, #0d0d12) !important;
     background-image:
-        /* Верхний стеклянный блик */
+        /* Top glass highlight */
         linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 70%),
-        /* Мягкие чернильные разводы (пропускают свечение акцентного цвета сайта) */
+        /* Soft ink smudges (let the site accent glow through) */
         radial-gradient(ellipse 70% 80% at 20% 30%, rgba(0, 0, 0, 0.55) 0%, rgba(10, 10, 12, 0.35) 60%, transparent 90%),
         radial-gradient(ellipse 65% 75% at 80% 70%, rgba(0, 0, 0, 0.6) 0%, rgba(8, 8, 10, 0.4) 60%, transparent 90%),
-        /* Полупрозрачная глубокая дымчатая вуаль */
+        /* Semi-transparent deep smoky veil */
         linear-gradient(180deg, rgba(14, 14, 18, 0.5) 0%, rgba(6, 6, 8, 0.7) 100%) !important;
     border: none !important;
     border-top: none !important;
-    border-bottom: none !important; /* Убрана тонкая разделительная полоса */
+    border-bottom: none !important; /* removed the thin separator line */
     outline: none !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
@@ -107,7 +113,7 @@
     content: none !important;
 }
 
-/* Полное удаление любых границ, линий (1px), теней и outline вокруг области рендера веб-страницы */
+/* Remove all borders, 1px lines, shadows and outlines around the web content area */
 #browser,
 #browser::before,
 #browser::after,
@@ -166,7 +172,7 @@ browser {
     content: none !important;
 }
 
-/* Навигационная панель поверх вкладок (строго на всю ширину окна) */
+/* Nav bar over the tabs (full window width) */
 #nav-bar {
     position: absolute !important;
     top: 0 !important;
@@ -192,7 +198,7 @@ browser {
     display: block !important;
 }
 
-/* Скрываем всё лишнее, оставляя нужные кнопки для наших двух панелей */
+/* Hide everything extra, keep only the buttons for our two panels */
 #downloads-button,
 #fxa-toolbar-menu-button,
 #ipprotection-button,
@@ -224,7 +230,7 @@ browser {
 
 
 /* ========================================================
-   2. ЛЕВОЕ МЕНЮ: КНОПКА УПРАВЛЕНИЯ + СТАНДАРТНЫЕ КНОПКИ FIREFOX
+   2. LEFT MENU: CONTROL BUTTON + STANDARD FIREFOX BUTTONS
    ======================================================== */
 
 #min-control-box {
@@ -242,7 +248,7 @@ browser {
     z-index: 99999 !important;
 }
 
-/* Кнопка управления на деке: прямоугольная 32x32, ховер как у кнопок окна */
+/* Control button on the deck: square 32x32, hover like window buttons */
 #min-control-btn {
     width: var(--btn-width, 32px) !important;
     height: var(--bar-height, 32px) !important;
@@ -283,13 +289,13 @@ browser {
     -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
 }
 
-/* Когда левое меню открыто в flyout-режиме — кнопка управления на деке скрывается */
+/* When the left menu is open as a flyout, the deck control button is hidden */
 #min-control-box.nav-open #min-control-btn,
 :root[left-menu-open="true"] #min-control-btn {
     display: none !important;
 }
 
-/* Выпадающая панель быстрого доступа: благородная капсула из тёмного стекла */
+/* Quick-access flyout: a noble dark-glass capsule */
 #min-nav-flyout {
     position: absolute !important;
     top: 3px !important;
@@ -305,7 +311,7 @@ browser {
     backdrop-filter: blur(20px) !important;
     border: 1px solid color-mix(in srgb, var(--site-accent, #ffffff) 25%, rgba(255, 255, 255, 0.2)) !important;
     border-radius: var(--tab-radius) !important;
-    overflow: hidden !important; /* Строго ограничивает выделение рамками меню */
+    overflow: hidden !important; /* keeps selection within the menu frame */
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.35),
         inset 0 -1px 0 rgba(0, 0, 0, 0.5),
@@ -324,7 +330,7 @@ browser {
     transform: scale(1) !important;
 }
 
-/* Режим "Всегда отображать левое меню": эффекта меню нет вообще, кнопки стоят прямо в панели */
+/* "Always show left menu" mode: no flyout effect at all, buttons sit in the bar */
 :root[always-show-left-menu="true"] #min-control-btn {
     display: none !important;
 }
@@ -339,7 +345,7 @@ browser {
     backdrop-filter: none !important;
 }
 
-/* Стандартные объекты кнопок Firefox внутри левой панели (ширина 28px, высота на всю капсулу) */
+/* Native Firefox buttons inside the left panel (28px wide, full capsule height) */
 #min-nav-flyout > toolbarbutton,
 #min-nav-flyout > #back-button,
 #min-nav-flyout > #forward-button,
@@ -369,7 +375,7 @@ browser {
     transition: background 0.12s ease-out !important;
 }
 
-/* Нативная кнопка stop-reload и её дочерние кнопки */
+/* Native stop-reload button and its children */
 #min-nav-flyout #stop-reload-button {
     position: relative !important;
     border: none !important;
@@ -381,7 +387,7 @@ browser {
     padding: 0 !important;
 }
 
-/* Кнопка остановки строго скрыта по умолчанию */
+/* The stop button is strictly hidden by default */
 #min-nav-flyout #stop-button,
 #min-nav-flyout #stop-reload-button > #stop-button,
 #stop-button:not([displaystop]) {
@@ -398,7 +404,7 @@ browser {
     pointer-events: none !important;
 }
 
-/* При реальной загрузке страницы меняем кнопку */
+/* Swap to the stop button while the page is loading */
 #min-nav-flyout #stop-reload-button[displaystop] > #reload-button,
 #min-nav-flyout #reload-button[displaystop] {
     display: none !important;
@@ -413,7 +419,7 @@ browser {
     width: var(--flyout-btn-width, 28px) !important;
 }
 
-/* Нативные векторные иконки Firefox */
+/* Native Firefox vector icons */
 #min-nav-flyout #reload-button > .toolbarbutton-icon {
     list-style-image: url("chrome://global/skin/icons/reload.svg") !important;
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
@@ -428,7 +434,7 @@ browser {
     transition: transform 0.2s ease !important;
 }
 
-/* Иконки кнопок в левой панели: крупный размер 18x18 без padding для максимальной чёткости */
+/* Left panel button icons: 18x18, no padding, for maximum crispness */
 #min-nav-flyout > toolbarbutton > .toolbarbutton-icon,
 #min-nav-flyout > toolbarbutton > .toolbarbutton-badge-stack,
 #min-nav-flyout #reload-button > .toolbarbutton-icon,
@@ -448,7 +454,7 @@ browser {
     -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
 }
 
-/* Затемнение фона секции иконки при наведении */
+/* Darken the icon section background on hover */
 #min-nav-flyout > toolbarbutton:hover,
 #min-nav-flyout > toolbarbutton[disabled]:hover,
 #min-nav-flyout > toolbaritem:hover,
@@ -463,7 +469,7 @@ browser {
     box-shadow: none !important;
 }
 
-/* Активная / нажатая иконка: подсвечивается только секция конкретной иконки */
+/* Active/pressed icon: only that icon's section is highlighted */
 #min-nav-flyout > toolbarbutton:active,
 #min-nav-flyout #reload-button:active,
 #min-nav-flyout #developer-button:active,
@@ -489,7 +495,7 @@ browser {
 
 
 /* ========================================================
-   3. ПРАВЫЙ БЛОК: КНОПКИ ОКНА + МЕНЮ ПО КЛИКУ ВЛЕВО
+   3. RIGHT BLOCK: WINDOW BUTTONS + MENU OPENING LEFTWARD
    ======================================================== */
 
 #TabsToolbar .titlebar-buttonbox-container {
@@ -521,10 +527,10 @@ browser {
 }
 
 /* ========================================================
-   3. ПРАВОЕ МЕНЮ: ГАМБУРГЕР НА ДЕКЕ + ПРАВАЯ КАПСУЛА
+   3. RIGHT MENU: DECK HAMBURGER + RIGHT CAPSULE
    ======================================================== */
 
-/* Главная кнопка меню на деке (Гамбургер в покое): прямоугольная 32x32, ховер как у кнопок окна */
+/* Main menu button on the deck (hamburger at rest): square 32x32, hover like window buttons */
 #PanelUI-button {
     position: absolute !important;
     top: 0 !important;
@@ -589,13 +595,13 @@ browser {
     box-shadow: none !important;
 }
 
-/* При открытом правом меню гамбургер на деке скрывается (внутри меню работает кнопка шестерёнки) */
+/* When the right menu is open the deck hamburger is hidden (the gear button works inside the menu) */
 :root[right-menu-open="true"] #PanelUI-button,
 #PanelUI-button.flyout-open {
     display: none !important;
 }
 
-/* Единая сплошная правая капсула: благородное тёмное стекло со скруглением и overflow: hidden */
+/* Single solid right capsule: noble dark glass, rounded, overflow: hidden */
 #min-right-flyout {
     position: absolute !important;
     top: 3px !important;
@@ -611,7 +617,7 @@ browser {
     backdrop-filter: blur(20px) !important;
     border: 1px solid color-mix(in srgb, var(--site-accent, #ffffff) 25%, rgba(255, 255, 255, 0.2)) !important;
     border-radius: var(--tab-radius) !important;
-    overflow: hidden !important; /* Строго ограничивает выделение рамками меню */
+    overflow: hidden !important; /* keeps selection within the menu frame */
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.35),
         inset 0 -1px 0 rgba(0, 0, 0, 0.5),
@@ -630,7 +636,7 @@ browser {
     transform: scale(1) !important;
 }
 
-/* Режим "Всегда отображать правое меню": эффекта меню нет вообще, кнопки стоят прямо в панели */
+/* "Always show right menu" mode: no flyout effect at all, buttons sit in the bar */
 :root[always-show-right-menu="true"] #min-right-flyout {
     opacity: 1 !important;
     pointer-events: auto !important;
@@ -641,7 +647,7 @@ browser {
     backdrop-filter: none !important;
 }
 
-/* Кнопки внутри правого меню (Firefox View, Расширения, Шестерёнка) */
+/* Buttons inside the right menu (Firefox View, Extensions, gear) */
 #min-right-flyout > toolbarbutton,
 #min-right-flyout > toolbaritem,
 #min-right-flyout > #firefox-view-button,
@@ -685,7 +691,7 @@ browser {
     -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
 }
 
-/* Затемнение фона секции конкретной иконки при наведении */
+/* Darken the specific icon's section background on hover */
 #min-right-flyout > toolbarbutton:hover,
 #min-right-flyout > toolbaritem:hover,
 #min-right-flyout #firefox-view-button:hover,
@@ -696,7 +702,7 @@ browser {
     box-shadow: none !important;
 }
 
-/* Активное / открытое состояние: подсвечивается только секция конкретной иконки */
+/* Active/open state: only that icon's section is highlighted */
 #min-right-flyout > toolbarbutton[open],
 #min-right-flyout > toolbarbutton:active,
 #min-right-flyout > toolbaritem[open],
@@ -714,7 +720,7 @@ browser {
 }
 
 /* ========================================================
-   3.1. БЛОК ЗАКРЕПЛЁННЫХ РАСШИРЕНИЙ (PINNED EXTENSIONS DECK)
+   3.1. PINNED EXTENSIONS DECK
    ======================================================== */
 #min-pinned-deck {
     position: absolute !important;
@@ -730,7 +736,7 @@ browser {
     transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* При раскрытии правого меню расширения сворачиваются в противоположную сторону (влево) */
+/* When the right menu opens, extensions collapse the other way (left) */
 :root[right-menu-open="true"] #min-pinned-deck {
     opacity: 0 !important;
     pointer-events: none !important;
@@ -739,7 +745,7 @@ browser {
     transform-origin: left center !important;
 }
 
-/* Кнопки расширений на деке: высота 32px во всю панель, ховер как у кнопок окна */
+/* Extension buttons on the deck: full-bar 32px height, hover like window buttons */
 #min-pinned-deck > toolbarbutton,
 #min-pinned-deck > toolbaritem,
 #min-pinned-deck > toolbaritem > toolbarbutton,
@@ -789,7 +795,7 @@ browser {
 
 
 /* ========================================================
-   4. СКРУГЛЁННАЯ АДРЕСНАЯ СТРОКА С ОБЪЁМОМ И ИЗБРАННЫМ
+   4. ROUNDED URL BAR WITH DEPTH AND BOOKMARK
    ======================================================== */
 
 #urlbar-container {
@@ -832,14 +838,14 @@ browser {
     pointer-events: auto !important;
 }
 
-/* Убираем лишний неуклюжий тултип под поисковой кнопкой */
+/* Remove the clumsy tooltip under the search button */
 tooltip[label*="search engine"],
 tooltip[label*="Поиск"],
 tooltip[label*="Search"] {
     display: none !important;
 }
 
-/* Стилизация выпадающего списка поисковых систем в стиле темы */
+/* Style the search-engine dropdown to match the theme */
 .searchmode-switcher-panel::part(content),
 .searchmode-switcher-panel {
     --panel-background: rgba(14, 14, 18, 0.96) !important;
@@ -895,7 +901,7 @@ tooltip[label*="Search"] {
     padding-left: 10px !important;
 }
 
-/* Скрываем всё лишнее: замок, трекинг, кнопку таскбара/PWA и прочие лишние действия страницы */
+/* Hide extras: lock, tracking, taskbar/PWA button and other page actions */
 #identity-box,
 #identity-icon-labels,
 #tracking-protection-icon-container,
@@ -906,7 +912,7 @@ tooltip[label*="Search"] {
     display: none !important;
 }
 
-/* Управление закладкой (Star / Edit Bookmark) */
+/* Bookmark control (Star / Edit Bookmark) */
 #page-action-buttons {
     display: flex !important;
     align-items: center !important;
@@ -924,7 +930,7 @@ tooltip[label*="Search"] {
     transition: background 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-/* Скрываем звёздочку на домашней странице, новой вкладке и при невалидном URL */
+/* Hide the star on home, new tab and invalid URLs */
 #urlbar[pageproxystate="invalid"] #star-button-box,
 #urlbar:not([pageproxystate="valid"]) #star-button-box,
 #urlbar[pageproxystate="invalid"] #star-button,
@@ -949,7 +955,7 @@ tooltip[label*="Search"] {
     opacity: 1 !important;
 }
 
-/* Выпадающий список результатов поиска со скруглениями и 3D эффектом */
+/* Search results dropdown with rounded corners and a 3D effect */
 .urlbarView {
     background: transparent !important;
     border: none !important;
@@ -997,7 +1003,7 @@ tooltip[label*="Search"] {
 
 
 /* ========================================================
-   5. ОСТРОВНЫЕ ОБЪЁМНЫЕ ВКЛАДКИ (С СИММЕТРИЧНЫМИ ОТСТУПАМИ)
+   5. ISLAND TABS WITH DEPTH (SYMMETRIC GAPS)
    ======================================================== */
 
 #tabbrowser-tabs {
@@ -1016,7 +1022,7 @@ tooltip[label*="Search"] {
     padding: 0 !important;
 }
 
-/* Острова: строго симметричные отступы 3px сверху и 3px снизу */
+/* Islands: strictly symmetric 3px top and 3px bottom */
 .tab-background {
     position: absolute !important;
     top: 3px !important;
@@ -1033,14 +1039,14 @@ tooltip[label*="Search"] {
     transition: background 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out !important;
 }
 
-/* Ховер неактивной вкладки */
+/* Hover on an inactive tab */
 .tabbrowser-tab:not([selected]):hover .tab-background {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(0, 0, 0, 0.2) 100%) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 6px rgba(0, 0, 0, 0.4) !important;
     border-color: rgba(255, 255, 255, 0.18) !important;
 }
 
-/* Активная вкладка — благородный чернильный фон с мягким акцентным оттенком и аккуратным контурным свечением */
+/* Active tab: noble ink background with a soft accent tint and a subtle outline glow */
 .tabbrowser-tab[selected] .tab-background {
     background-color: color-mix(in srgb, var(--site-accent, #1c1c22) 25%, #121218) !important;
     background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 60%, transparent 100%) !important;
@@ -1073,7 +1079,7 @@ tooltip[label*="Search"] {
     padding: 0 8px !important;
 }
 
-/* Крестик активной вкладки: аккуратная круглая кнопка (✕) в стиле Min */
+/* Active tab close button: a neat round (✕) Min-style button */
 .tab-close-button {
     fill: #ffffff !important;
     color: #ffffff !important;
@@ -1098,7 +1104,7 @@ tooltip[label*="Search"] {
     background: rgba(235, 55, 75, 0.8) !important;
 }
 
-/* Кнопка новой вкладки */
+/* New tab button */
 #new-tab-button {
     display: none !important;
 }
@@ -1133,7 +1139,7 @@ tooltip[label*="Search"] {
 
 
 /* ========================================================
-   6. ПАНЕЛЬ ЗАКЛАДОК: МНОГОСТРОЧНАЯ, ИКОНКИ +2px (18px)
+   6. BOOKMARKS TOOLBAR: MULTI-ROW, ICONS +2px (18px)
    ======================================================== */
 
 #PersonalToolbar {
@@ -1165,17 +1171,17 @@ tooltip[label*="Search"] {
     width: 100vw !important;
 }
 
-/* Перенос на новую строку при переполнении (вплоть до низа экрана) */
+/* Wrap to a new row on overflow (down to the bottom of the screen) */
 #PlacesToolbarItems {
     display: flex !important;
     flex-wrap: wrap !important;
     max-height: calc(100vh - var(--bar-height) - 40px) !important;
     overflow-y: auto !important;
     scrollbar-width: thin !important;
-    padding-right: 44px !important; /* место под отдельную кнопку Other Bookmarks справа */
+    padding-right: 44px !important; /* room for the standalone Other Bookmarks button */
 }
 
-/* Скрываем стрелку переполнения >> раз есть перенос на новую строку */
+/* Hide the overflow chevron >> since we wrap to a new row */
 #PlacesChevron {
     display: none !important;
 }
@@ -1186,7 +1192,7 @@ tooltip[label*="Search"] {
     padding: 3px 6px !important;
 }
 
-/* Иконки закладок на пару пикселей больше (18px вместо 16px) */
+/* Bookmark icons a couple px bigger (18px instead of 16px) */
 #PlacesToolbarItems > .bookmark-item .toolbarbutton-icon {
     width: 18px !important;
     height: 18px !important;
@@ -1197,7 +1203,7 @@ tooltip[label*="Search"] {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Только иконки; подпись выезжает плавно у той закладки, на которую навели */
+/* Icons only; the label slides in for the hovered bookmark */
 #PlacesToolbarItems > .bookmark-item > .toolbarbutton-text {
     display: block !important;
     max-width: 0 !important;
@@ -1215,7 +1221,7 @@ tooltip[label*="Search"] {
     opacity: 1 !important;
 }
 
-/* --- Кнопка "Другие закладки" (вынесена отдельно вне сетки, без текста, со своей иконкой) --- */
+/* --- "Other Bookmarks" button (standalone, outside the grid, no text, own icon) --- */
 #OtherBookmarks {
     position: absolute !important;
     right: 6px !important;
@@ -1236,12 +1242,12 @@ tooltip[label*="Search"] {
     border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Скрываем текст названия "Другие закладки" */
+/* Hide the "Other Bookmarks" label text */
 #OtherBookmarks > .toolbarbutton-text {
     display: none !important;
 }
 
-/* Кастомная аккуратная иконка для Other Bookmarks */
+/* Custom neat icon for Other Bookmarks */
 #OtherBookmarks > .toolbarbutton-icon {
     width: 18px !important;
     height: 18px !important;
