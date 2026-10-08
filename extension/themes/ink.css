@@ -67,11 +67,11 @@
 }
 
 :root[has-pinned-extensions="true"] {
-    --pinned-gap: 8px;
-    --tabs-right-padding: calc(var(--right-menu-width) + var(--pinned-extensions-width) + 8px) !important;
+    --pinned-gap: 4px;
+    --tabs-right-padding: calc(var(--right-menu-width) + var(--pinned-extensions-width) + var(--pinned-gap)) !important;
 }
 
-/* Dynamic padding when a menu opens or is pinned (always 8px gap to the tabs) */
+/* Dynamic padding when a menu opens or is pinned */
 :root[left-menu-open="true"],
 :root[always-show-left-menu="true"] {
     --left-menu-width: 124px !important;
@@ -80,7 +80,18 @@
 :root[right-menu-open="true"],
 :root[always-show-right-menu="true"] {
     --right-menu-width: 192px !important;
+}
+
+/* Right flyout open (transient): the pinned deck collapses, so its width is not
+   reserved. */
+:root[right-menu-open="true"] {
     --tabs-right-padding: 192px !important;
+}
+
+/* Always-show right: the pinned deck stays visible, so reserve its width too
+   (this must come AFTER the rule above — equal specificity, later wins). */
+:root[always-show-right-menu="true"] {
+    --tabs-right-padding: calc(var(--right-menu-width) + var(--pinned-extensions-width) + var(--pinned-gap)) !important;
 }
 
 /* ========================================================
@@ -343,10 +354,6 @@ browser {
     opacity: 1 !important;
     pointer-events: auto !important;
     transform: none !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
 }
 
 /* Native Firefox buttons inside the left panel (28px wide, full capsule height) */
@@ -645,10 +652,6 @@ browser {
     opacity: 1 !important;
     pointer-events: auto !important;
     transform: none !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
 }
 
 /* Buttons inside the right menu (Firefox View, Extensions, gear) */
@@ -771,8 +774,10 @@ browser {
     transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* When the right menu opens, extensions collapse the other way (left) */
-:root[right-menu-open="true"] #min-pinned-deck {
+/* When the right menu opens TRANSIENTLY, extensions collapse the other way
+   (left). In always-show-right mode the menu is permanently open, so the deck
+   must stay visible — exclude that mode. */
+:root:not([always-show-right-menu="true"])[right-menu-open="true"] #min-pinned-deck {
     opacity: 0 !important;
     pointer-events: none !important;
     max-width: 0 !important;
