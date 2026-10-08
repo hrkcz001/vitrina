@@ -824,10 +824,10 @@ browser {
 
 #min-pinned-deck .toolbarbutton-icon,
 #min-pinned-deck .toolbarbutton-badge-stack {
-    /* Native 16x16: the engine positions the notification badge against these
-       metrics, so an upscaled icon pushes the badge out and clips it. */
-    width: 16px !important;
-    height: 16px !important;
+    /* 18px, same as the flyout buttons; the badge clip was a nested wrapper
+       (overflow), not the icon size. */
+    width: 18px !important;
+    height: 18px !important;
     padding: 0 !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;

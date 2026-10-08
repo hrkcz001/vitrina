@@ -25,12 +25,24 @@ box survives). The gear sets `:root[panelui-anchor="true"]` → CSS reveals the
 button → `PanelUI.show()` → on `popuphidden` the attribute is removed. Verified
 working by the user.
 
-## TASK 4 — Badge clipping  [BUILT — awaiting visual check]
-`#min-pinned-deck .toolbarbutton-icon, ...badge-stack`: 18px → 16px (native
-metrics). 17px only if 16 looks too small and still clips.
+## TASK 4 — Badge clipping  [FIXED — awaiting visual check]
+Real cause (probe): a pinned extension is wrapped
+(`toolbaritem > .unified-extensions-item-row-wrapper > toolbarbutton`); the badge
+lives in the DEEPEST button, which ships with `overflow:hidden` and clips it. The
+`> toolbaritem > toolbarbutton` child selector never matched the grandchild.
+Fix: open `overflow` on the whole deck descendant chain (`#min-pinned-deck
+toolbarbutton, toolbaritem, .unified-extensions-item-row-wrapper, .webextension-action`).
+(Icon size was NOT the cause; the earlier 18→16 change was noise.)
 
-## TASK 5 — Right menu vs left visual mismatch  [BLOCKED on user input]
-Needs a user screenshot/description of the exact diffing element.
+## TASK 5 — Right menu vs left visual mismatch  [PARTIAL]
+User: no default dividers (that was a two-button hover in the screenshot — not a
+bug). Real diffs: (a) active/hover highlight differs; (b) deck right side seemed
+darker.
+Fix: added `outline:none` to the right flyout buttons + badge-stack/icon (the
+left already had it; the native widgets carried a white focus outline). Cleared
+background/border/shadow/outline on the deck's `.unified-extensions-item-row-wrapper`
+and `.unified-extensions-item`. Verify visually; if the active highlight still
+differs, compare the `:active` gradients next.
 
 ## TASK 6 — Cleanup & release
 - Remove diagnostics + `docs/NOTES-gear.md` (or keep as history).
