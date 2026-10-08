@@ -451,12 +451,12 @@ browser {
 
 /* Active/pressed icon: only that icon's section is highlighted, ONLY on press.
    The reload button is a compound widget (#stop-reload-button > #reload-button);
-   whichever of the two carries :active, the whole slot gets the highlight. */
+   :active propagates to BOTH slot and inner button, so highlighting descendants
+   drew TWO rings. Highlight ONLY the slot, and cover both cases with :has(). */
 #min-nav-flyout > *:active,
 #min-nav-flyout #stop-reload-button:active,
-#min-nav-flyout #stop-reload-button:active *,
-#min-nav-flyout #reload-button:active,
-#min-nav-flyout #stop-button:active,
+#min-nav-flyout #stop-reload-button:has(#reload-button:active),
+#min-nav-flyout #stop-reload-button:has(#stop-button:active),
 #min-nav-flyout #developer-button:active,
 #min-nav-flyout #back-button:active,
 #min-nav-flyout #forward-button:active {
@@ -465,10 +465,13 @@ browser {
     border: none !important;
 }
 
-/* The reload button itself must never lose the highlight to the outer slot's
-   transparent background — keep its own pressed fill. */
-#min-nav-flyout #reload-button:active {
-    background-color: rgba(0, 0, 0, 0.55) !important;
+/* Inner reload/stop and their icons must NEVER carry their own ring */
+#min-nav-flyout #reload-button:active,
+#min-nav-flyout #stop-button:active,
+#min-nav-flyout #reload-button:active > .toolbarbutton-icon,
+#min-nav-flyout #stop-button:active > .toolbarbutton-icon {
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 #min-nav-flyout > :last-child,
