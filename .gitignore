@@ -1,3 +1,6 @@
 # build artifacts
 *.xpi
 *.zip
+
+# Hermes local plans/scratch (never ship)
+.hermes/
