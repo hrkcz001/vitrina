@@ -5,10 +5,13 @@
 #   pwsh -File build.ps1              # pack only
 #   pwsh -File build.ps1 -Install     # pack and copy into the profile
 #
-# Vitrina is a WebExtension Experiment: Firefox cannot install it through the
-# normal about:addons / "Install Add-on From File" flow (experiment APIs are
-# never signed by Mozilla), so the only permanent install path is dropping the
-# xpi into <profile>/extensions/.
+# Vitrina is a WebExtension Experiment. Getting it running needs two things
+# the installer must arrange:
+#   1. the xpi in <profile>/extensions/ (auto-loaded) with the signature check
+#      off and experiment APIs on;
+#   2. extensions.autoDisableScopes=0 - Firefox silently auto-disables any
+#      sideloaded (app-profile) extension unless this scope mask is cleared, so
+#      without it the copied xpi registers but stays inactive.
 
 [CmdletBinding()]
 param(
@@ -52,6 +55,25 @@ if ($Install) {
         Write-Error "Could not write $target - is Firefox running? Close it and retry. ($($_.Exception.Message))"
         exit 1
     }
+
+    # Required prefs (idempotent - only appended when absent).
+    $userJs = Join-Path $profile 'user.js'
+    $prefs = [ordered]@{
+        'xpinstall.signatures.required'  = 'false'
+        'extensions.experiments.enabled' = 'true'
+        'extensions.autoDisableScopes'   = '0'
+        'extensions.enabledScopes'       = '5'
+    }
+    $existing = if (Test-Path -LiteralPath $userJs) { Get-Content -LiteralPath $userJs -Raw } else { '' }
+    $added = @()
+    foreach ($k in $prefs.Keys) {
+        if ($existing -notmatch [regex]::Escape($k)) {
+            Add-Content -LiteralPath $userJs -Value "user_pref(`"$k`", $($prefs[$k]));" -Encoding ASCII
+            $added += $k
+        }
+    }
+
     Write-Host "Installed to: $target"
+    if ($added.Count) { Write-Host "Set prefs in user.js: $($added -join ', ')" }
     Write-Host 'Restart Firefox Developer Edition to apply.'
 }

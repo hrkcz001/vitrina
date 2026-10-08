@@ -156,7 +156,26 @@ Firefox, and there is no install trick that changes this:
 - An experiment extension can never be signed by Mozilla, so it must load as an
   unsigned package; `xpinstall.signatures.required = false` is honored only in
   DE/Nightly/ESR, ignored on release.
-Therefore the normal `about:addons` / "Install Add-on From File" flow does not
-apply; the only permanent install is dropping the xpi into
-`<profile>/extensions/` (what the scoop installer and `build.ps1 -Install` do).
-`about:debugging` temporary install works but is lost on restart.
+
+## How installation actually works (verified)
+Two things are needed to get Vitrina running; both are set by the scoop
+installer and by `build.ps1 -Install`:
+1. The xpi in `<profile>/extensions/vitrina@local.xpi` plus the prefs
+   `xpinstall.signatures.required=false` and
+   `extensions.experiments.enabled=true`.
+2. `extensions.autoDisableScopes=0`. Firefox auto-disables any sideloaded
+   (app-profile scope) extension unless this mask is cleared. Verified by
+   experiment: with the default mask a copied xpi appears in `extensions.json`
+   as `app-profile` but stays `active=false`; with the mask set to `0` it comes
+   up `active=true` on the next start. This was the missing piece that made a
+   bare copy look like it "did not work".
+
+Install paths (both valid on DE):
+- **Auto-load:** drop the xpi into `extensions/` — no UI step, requires the
+  prefs above.
+- **UI:** `about:addons` → "Install Add-on From File…" / drag-drop. Works on DE
+  with the prefs above; the UI path registers the extension as active directly,
+  bypassing the auto-disable. (Note: an earlier revision of this doc wrongly
+  claimed the UI path "does not work" for experiment extensions — that was
+  incorrect for DE.)
+`about:debugging` temporary install also works but is lost on restart.

@@ -346,11 +346,11 @@ this.vitrina = class extends ExtensionAPI {
         panelBtn?.classList.add("flyout-open");
         doc.documentElement.setAttribute("right-menu-open", "true");
         if (!wasOpen) {
-          // The click that opened us lands on a different target once the
-          // hamburger is hidden, which would instantly re-close the flyout.
-          // Ignore close attempts until the next task.
+          // Opening hides the hamburger (display:none), so the mouseup/click of
+          // the SAME gesture lands on whatever is underneath. Any stray click
+          // arriving in capture would instantly re-close the flyout. Hold the
+          // guard until this gesture's button is released.
           rightJustOpened = true;
-          win.setTimeout(() => { rightJustOpened = false; }, 0);
         }
       } else {
         rightFlyout.classList.remove("open");
@@ -358,6 +358,12 @@ this.vitrina = class extends ExtensionAPI {
         doc.documentElement.removeAttribute("right-menu-open");
       }
     };
+
+    // Release the open guard once the pointer is up (independent of where it
+    // ends up, because the hamburger has been removed from the layout).
+    const onPointerUp = () => { rightJustOpened = false; };
+    doc.addEventListener("pointerup", onPointerUp, true);
+    doc.addEventListener("mouseup", onPointerUp, true);
 
     const onPanelBtnMouseDown = e => {
       if (e.button !== 0) return;
@@ -504,6 +510,8 @@ this.vitrina = class extends ExtensionAPI {
         extObserver?.disconnect();
         doc.removeEventListener("click", onDocClick, true);
         doc.removeEventListener("mousemove", onDocMouseMove);
+        doc.removeEventListener("pointerup", onPointerUp, true);
+        doc.removeEventListener("mouseup", onPointerUp, true);
         controlBtn.removeEventListener("click", onControlClick);
         controlBtn.removeEventListener("contextmenu", onControlContextMenu);
         panelBtn?.removeEventListener("mousedown", onPanelBtnMouseDown, true);
