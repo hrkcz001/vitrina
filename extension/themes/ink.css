@@ -354,9 +354,7 @@ browser {
 #min-nav-flyout > #back-button,
 #min-nav-flyout > #forward-button,
 #min-nav-flyout > #stop-reload-button,
-#min-nav-flyout > #developer-button,
-#min-nav-flyout #stop-reload-button > #reload-button,
-#min-nav-flyout #reload-button {
+#min-nav-flyout > #developer-button {
     display: inline-flex !important;
     visibility: visible !important;
     width: var(--flyout-btn-width, 28px) !important;
@@ -379,6 +377,12 @@ browser {
     transition: background 0.12s ease-out !important;
 }
 
+/* The reload/stop widget is left to Firefox: it swaps reload <-> stop (the X
+   during load) by toggling [displaystop] on #reload-button and showing the
+   sibling #stop-button. Do NOT force display or custom icons on them, or the
+   native swap (and the stop X) breaks. Only the animation box is hidden inside
+   the flyout by Firefox itself (it is not in #nav-bar-customization-target). */
+
 /* Native stop-reload button and its children */
 #min-nav-flyout #stop-reload-button {
     position: relative !important;
@@ -391,51 +395,23 @@ browser {
     padding: 0 !important;
 }
 
-/* The stop button is strictly hidden by default */
-#min-nav-flyout #stop-button,
-#min-nav-flyout #stop-reload-button > #stop-button,
-#stop-button:not([displaystop]) {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    max-width: 0 !important;
+/* The reload/stop swap (reload icon, and the X while loading) is entirely
+   Firefox's job: [displaystop] is toggled on #reload-button and CSS hides one
+   of the two siblings. We do NOT hide #stop-button, force #reload-button's
+   display, or set custom list-style-images — all three broke the native swap.
+   The buttons are sized only (icon 18px below), which the native rules accept. */
+#min-nav-flyout #reload-button,
+#min-nav-flyout #stop-button {
+    width: var(--flyout-btn-width, 28px) !important;
+    height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
+    align-items: center !important;
+    justify-content: center !important;
     background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
     outline: none !important;
-    pointer-events: none !important;
-}
-
-/* Swap to the stop button while the page is loading */
-#min-nav-flyout #stop-reload-button[displaystop] > #reload-button,
-#min-nav-flyout #reload-button[displaystop] {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-}
-
-#min-nav-flyout #stop-reload-button[displaystop] > #stop-button,
-#min-nav-flyout #stop-button[displaystop] {
-    display: inline-flex !important;
-    visibility: visible !important;
-    width: var(--flyout-btn-width, 28px) !important;
-}
-
-/* Native Firefox vector icons */
-#min-nav-flyout #reload-button > .toolbarbutton-icon {
-    list-style-image: url("chrome://global/skin/icons/reload.svg") !important;
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
-}
-
-#min-nav-flyout #reload-button:active > .toolbarbutton-icon {
-    transform: rotate(360deg) !important;
-}
-
-#min-nav-flyout #stop-button > .toolbarbutton-icon {
-    list-style-image: url("chrome://global/skin/icons/close.svg") !important;
-    transition: transform 0.2s ease !important;
 }
 
 /* Left panel button icons: 18x18, no padding, for maximum crispness */
