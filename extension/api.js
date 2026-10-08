@@ -11,8 +11,11 @@
 /* global ExtensionAPI, Services, Cc, Ci, ChromeUtils */
 
 const THEMES = {
-  "ink": "vitrina.css",
-  "bw-gloss": "bw-gloss.css",
+  "ink": "ink.css",
+  "gloss": "gloss.css",
+  // Skeletons — not implemented yet (see themes/*.css TODOs):
+  // "stock": native Firefox look adapted to Vitrina widgets
+  // "contrast": super-contrast, strictly #000 + #fff
 };
 const DEFAULT_THEME = "ink";
 const DEFAULT_ACCENT = "#1c1c22";

@@ -1,12 +1,12 @@
 "use strict";
 
-const btnGlass = document.getElementById("theme-glass");
-const btnBw = document.getElementById("theme-bw");
+const btnGlass = document.getElementById("theme-ink");
+const btnBw = document.getElementById("theme-gloss");
 const chkLeft = document.getElementById("always-show-left");
 const chkRight = document.getElementById("always-show-right");
 
 function updateUI(theme) {
-  if (theme === "bw-gloss") {
+  if (theme === "gloss") {
     btnBw.classList.add("active");
     btnGlass.classList.remove("active");
   } else {
@@ -27,8 +27,8 @@ btnGlass.addEventListener("click", () => {
 });
 
 btnBw.addEventListener("click", () => {
-  updateUI("bw-gloss");
-  browser.runtime.sendMessage({ type: "SWITCH_THEME", theme: "bw-gloss" });
+  updateUI("gloss");
+  browser.runtime.sendMessage({ type: "SWITCH_THEME", theme: "gloss" });
 });
 
 function syncMenuOptions() {

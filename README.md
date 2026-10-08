@@ -36,7 +36,7 @@ scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`
 - Click on the active tab focuses the URL bar (Min-browser behavior)
 - Pinned extension buttons deck
 - Multi-row wrapping bookmarks toolbar (icons only, hover to reveal labels)
-- Two themes: `vitrina-ink` (ink & glass) and `bw-gloss` (monochrome gloss)
+- Two themes: `vitrina-ink` (ink & glass) and `gloss` (monochrome gloss)
 
 ## Development
 

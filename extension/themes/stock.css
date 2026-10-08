@@ -1,0 +1,27 @@
+/* Skeleton: "stock" theme — an adaptation of the standard Firefox Developer
+ * Edition look, lightly adjusted to coexist with Vitrina's injected widgets
+ * (left flyout, right flyout, pinned deck). Not implemented yet: placeholders
+ * below define the structural contract only.
+ *
+ * Design intent: keep native Firefox colors and radii; only neutralize what
+ * Vitrina's widget injection strictly requires (transparent nav-bar overlay,
+ * flyout capsules styled like native panels). No ink, no glass.
+ */
+
+:root {
+    /* Native-ish dimensions */
+    --bar-height: 32px !important;
+    --btn-width: 32px !important;
+    --flyout-btn-width: 28px !important;
+    --right-gap: 136px !important;
+    --tab-radius: 4px !important;
+    --left-menu-width: 40px !important;
+    --right-menu-width: 136px !important;
+
+    /* Firefox default toolbar colors (follow system theme where possible) */
+    --toolbar-bgcolor: var(--lwt-accent-color, #f9f9fb) !important;
+
+    /* TODO: structural rules for #min-control-box / #min-nav-flyout /
+       #min-right-flyout / #min-pinned-deck / collapsing urlbar.
+       Port from ink.css, replacing ink/glass visuals with native ones. */
+}

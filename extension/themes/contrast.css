@@ -1,0 +1,41 @@
+/* Skeleton: "contrast" theme — super-contrast, exactly two colors:
+ * pure black (#000) and pure white (#fff). Derived from the old bw-gloss
+ * experiment but reduced to a strict two-color contract.
+ *
+ * Rules of the theme:
+ *   - background: #000
+ *   - foreground / borders / focus rings: #fff
+ *   - hover: solid #fff background with #000 text (full inversion)
+ *   - NO accent colors, NO site-accent mixing, NO gradients, NO shadows
+ *     (shadows would introduce grays), NO translucency.
+ */
+
+:root {
+    --bar-height: 32px !important;
+    --btn-width: 32px !important;
+    --flyout-btn-width: 28px !important;
+    --right-gap: 136px !important;
+    --tab-radius: 0px !important;
+    --left-menu-width: 40px !important;
+    --right-menu-width: 136px !important;
+
+    /* Kill Firefox theming vars — two colors only */
+    --lwt-accent-color: #000 !important;
+    --lwt-text-color: #fff !important;
+    --toolbar-bgcolor: #000 !important;
+    --toolbar-color: #fff !important;
+    --focus-outline-color: #fff !important;
+    --toolbar-field-background-color: #000 !important;
+    --toolbar-field-focus-background-color: #000 !important;
+    --panel-background: #000 !important;
+    --panel-border-color: #fff !important;
+
+    /* TODO: port structural rules from gloss.css (the former bw-gloss),
+       stripping all gradients (g-gloss / g-gloss-dim / g-inverse) down to
+       solid #fff / #000 blocks. */
+}
+
+::selection {
+    background: #fff !important;
+    color: #000 !important;
+}

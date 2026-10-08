@@ -18,7 +18,7 @@ with glass aesthetics and dynamic per-site accent colors.
 | `content-script.js` | Reads `<meta name="theme-color">` from every page, reports changes via runtime messages |
 | `popup/popup.{html,js}` | Theme picker (2 hardcoded buttons) + 2 checkboxes (always-show left/right menus) |
 | `themes/vitrina.css` | 1252 lines, main theme (identical copy deployed as `profile/chrome/userChrome.css`) |
-| `themes/bw-gloss.css` | 450 lines, secondary B/W theme |
+| `themes/gloss.css` | 450 lines, secondary B/W theme |
 
 ### Deployment
 `vitrina.xpi` is installed in the profile (`extensions/vitrina@local.xpi`),
@@ -44,14 +44,14 @@ can be deleted).
 
 ## Bugs found (candidates, to confirm with user)
 
-1. **bw-gloss + widget injection mismatch (likely visible breakage).** `setupMenus`
+1. **gloss + widget injection mismatch (likely visible breakage).** `setupMenus`
    unconditionally creates the min-* widgets and moves native buttons into them
-   regardless of theme, but `bw-gloss.css` was written for the old layout:
+   regardless of theme, but `gloss.css` was written for the old layout:
    it never styles `#min-control-box`, `#min-nav-flyout`, `#min-right-flyout`,
    `#min-pinned-deck`, and it positions `#firefox-view-button` absolutely at
    `right: btn*4` — yet api.js moves firefox-view into `#min-right-flyout`.
    Also bw's hide-list `#nav-bar-customization-target > :not(...)` no longer
-   matches moved buttons. Switching to bw-gloss very likely produces a broken
+   matches moved buttons. Switching to gloss very likely produces a broken
    right side / floating buttons.
 2. **`movedPinned` duplicate accumulation.** `updatePinnedExtensions` pushes to
    `movedPinned` on every MutationObserver firing for elements it already moved
@@ -92,7 +92,7 @@ can be deleted).
 ### Phase 1 — bug fixes (no architecture change)
 - Fix movedPinned guard (Set of moved elements).
 - Fix flyout-open class cleanup.
-- Make bw-gloss at least neutralize the injected widgets (Phase 2 solves it
+- Make gloss at least neutralize the injected widgets (Phase 2 solves it
   properly via layout/skin split).
 - De-duplicate magic numbers: JS reads geometry from CSS custom properties via
   `getComputedStyle` where needed (mousemove thresholds derived from actual
@@ -134,7 +134,7 @@ themes/
   `theme.json` schemas (built now as scaffolding; UI polish later).
 - Keep `--site-accent` mechanism: _base.css maps `--mg-accent` from
   `--site-accent` unless theme.json setting overrides the source.
-- bw-gloss becomes a proper theme folder; its deliberate layout deviations
+- gloss becomes a proper theme folder; its deliberate layout deviations
   (e.g. no pinned deck) expressed via tokens + theme.json option flags
   (`"features": {"leftFlyout": false}`) that api.js reads to skip widget moves.
 
