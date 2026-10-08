@@ -769,6 +769,8 @@ browser {
     box-shadow: none !important;
     cursor: pointer !important;
     flex: none !important;
+    /* Let the notification badge overflow the 28x32 button instead of clipping */
+    overflow: visible !important;
     transition: background 0.15s ease-out !important;
 }
 
@@ -788,6 +790,8 @@ browser {
     padding: 0 !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
+    /* Do not clip the badge that sits in the icon's top-right corner */
+    overflow: visible !important;
     fill: #ffffff !important;
     color: #ffffff !important;
     background: transparent !important;
