@@ -11,40 +11,32 @@ rearranges native toolbar widgets.
 > locked off in release builds) and the ability to load an unsigned package
 > (`xpinstall.signatures.required=false` is ignored in release builds, and
 > Mozilla never signs experiment APIs). ESR can work only if experiment prefs
-> are enabled by policy. The scoop manifest therefore depends on
-> `firefox-developer`.
+> are enabled by policy. Install it on Developer Edition as an unsigned
+> extension (see below).
 
 ## Install
 
-### Scoop (recommended)
+Vitrina ships as a plain, unsigned `.xpi` — no store, no scoop. You point
+Firefox Developer Edition at the file.
 
-```powershell
-scoop bucket add hrkcz001 https://github.com/hrkcz001/scoop_bucket
-scoop install hrkcz001/vitrina
-```
-The manifest depends on `firefox-developer` and installs the xpi into the
-scoop-persisted profile (`~/scoop/persist/firefox-developer/profile/extensions/`).
-
-### Manual
-
-1. `pwsh -File build.ps1` — packs `extension/` into `dist/vitrina.xpi`
-   (or `build.cmd` on plain Command Prompt)
-2. Install the xpi either way:
-   - **Auto-load:** copy it to `<profile>/extensions/vitrina@local.xpi`. Firefox
-     picks it up on the next start — but only if `extensions.autoDisableScopes`
-     is `0`, otherwise it auto-disables the sideloaded extension (it registers
-     but stays inactive).
-   - **UI:** `about:addons` → gear → "Install Add-on From File…", or drag-drop
-     the xpi. This works on Developer Edition because it is an unsigned
-     experiment extension and the required prefs are set (see below).
-3. Required prefs in `<profile>/user.js`:
+1. Get the xpi: download it from the [latest release](https://github.com/hrkcz001/vitrina/releases),
+   or build it locally with `pwsh -File build.ps1` (→ `dist/vitrina.xpi`).
+2. Make sure these prefs are set in `<profile>/user.js`:
    ```
    user_pref("xpinstall.signatures.required", false);
    user_pref("extensions.experiments.enabled", true);
    user_pref("extensions.autoDisableScopes", 0);
    user_pref("extensions.enabledScopes", 5);
    ```
-   `build.ps1 -Install` and the scoop installer set these automatically.
+3. Install it either way:
+   - **UI:** `about:addons` → gear → "Install Add-on From File…" (or drag-drop
+     the xpi onto the window). This is the normal path and works on Developer
+     Edition for an unsigned experiment extension once the prefs above are set.
+   - **Auto-load:** copy the xpi to `<profile>/extensions/vitrina@local.xpi`.
+     Firefox registers it on the next start — but only if
+     `extensions.autoDisableScopes` is `0`, otherwise it auto-disables the
+     sideloaded extension (it appears but stays inactive).
+4. Restart Firefox Developer Edition.
 
 ## Features
 
@@ -69,9 +61,7 @@ extension/
   themes/            theme stylesheets (injected per-window as USER_SHEET)
 docs/ANALYSIS.md     architecture analysis & refactor plan
 docs/PLAN.md         phased execution plan
-build.ps1            packs the xpi (PowerShell; -Install copies to the profile)
-build.sh             thin bash wrapper around build.ps1 (for git-bash users)
-build.cmd            wrapper so it runs from Command Prompt / double-click
+build.ps1            packs the xpi (PowerShell); -Install copies it into the profile and sets the required prefs
 ```
 
 After each code change: `pwsh -File build.ps1 -Install` (Firefox must be closed),

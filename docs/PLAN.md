@@ -1,7 +1,8 @@
 # Vitrina — Detailed Execution Plan
 
 Goal: take the current state (themes renamed to ink/gloss, repo vitrina,
-scoop manifest vitrina.json, releases v1.1.0-vitrina) to a clean, theme-system
+releases vX.Y.Z-vitrina; distributed as a plain unsigned extension — no scoop)
+to a clean, theme-system
 architecture that can be implemented by a weaker model step by step.
 Every task below is self-contained; do them in order. After each task: run
 `pwsh -File build.ps1 -Install` (Firefox must be closed), restart Firefox Dev,
@@ -276,7 +277,8 @@ both menus, pinned deck, bookmarks wrap.
   extensions 0/1/3 x about:home / github / youtube / yandex (theme-color).
 - Git workflow for the weak model: one commit per P-task, message
   `P1.3: <summary>`. Push after each phase. Releases: after Phase 2 tag
-  `v1.2.0-vitrina` and update scoop manifest hash.
+  `v1.2.0-vitrina` and attach the xpi (installed as a plain unsigned
+  extension; scoop is no longer used).
 
 ## Quick smoke test script (manual, after any change)
 1. `./build.sh --install`

@@ -1,5 +1,5 @@
 # Packs extension/ into dist/vitrina.xpi and optionally installs it into the
-# scoop-persisted Firefox Developer profile.
+# local Firefox Developer profile.
 #
 # Usage:
 #   pwsh -File build.ps1              # pack only

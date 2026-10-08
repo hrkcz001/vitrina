@@ -158,10 +158,9 @@ Firefox, and there is no install trick that changes this:
   DE/Nightly/ESR, ignored on release.
 
 ## How installation actually works (verified)
-Two things are needed to get Vitrina running; both are set by the scoop
-installer and by `build.ps1 -Install`:
-1. The xpi in `<profile>/extensions/vitrina@local.xpi` plus the prefs
-   `xpinstall.signatures.required=false` and
+Vitrina installs as a plain unsigned xpi — no store, no scoop. Two things are
+needed, both in the profile's `user.js`:
+1. `xpinstall.signatures.required=false` and
    `extensions.experiments.enabled=true`.
 2. `extensions.autoDisableScopes=0`. Firefox auto-disables any sideloaded
    (app-profile scope) extension unless this mask is cleared. Verified by
@@ -171,11 +170,25 @@ installer and by `build.ps1 -Install`:
    bare copy look like it "did not work".
 
 Install paths (both valid on DE):
-- **Auto-load:** drop the xpi into `extensions/` — no UI step, requires the
-  prefs above.
-- **UI:** `about:addons` → "Install Add-on From File…" / drag-drop. Works on DE
-  with the prefs above; the UI path registers the extension as active directly,
-  bypassing the auto-disable. (Note: an earlier revision of this doc wrongly
-  claimed the UI path "does not work" for experiment extensions — that was
-  incorrect for DE.)
+- **UI:** `about:addons` → "Install Add-on From File…" / drag-drop. Normal path;
+  registers the extension active directly. (An earlier revision of this doc
+  wrongly claimed the UI path "does not work" for experiment extensions — that
+  was incorrect for DE.)
+- **Auto-load:** drop the xpi into `extensions/vitrina@local.xpi` — no UI step,
+  requires the prefs above (and `autoDisableScopes=0`).
 `about:debugging` temporary install also works but is lost on restart.
+
+## Right-menu close bug (root cause, fixed)
+The right flyout closed the instant it opened. Two independent causes, both
+stemming from the hamburger going `display:none` while the flyout is open:
+- `onDocClick` (capture "close on outside click"): the `click` of the opening
+  gesture is re-targeted to a foreign element because the button vanished
+  under the cursor, so the outside-click handler closed the flyout. Guarding
+  with a `setTimeout(0)` or clearing on `mouseup` both fail — a 0ms timer fires
+  mid-gesture, and `mouseup` precedes `click`. Fix: keep a `justOpened` flag and
+  *consume* it inside the outside-click handler (swallow exactly one click); a
+  document-capture `mousedown` clears it as a fallback for the no-click case.
+- `onDocMouseMove` ("close when the cursor moves far away"):
+  `panelBtn.getBoundingClientRect()` is all zeros while the button is
+  `display:none`, so `x > 0 + margin` was true on the first mouse move. Fix:
+  fall back to the flyout's own rect when the button rect has zero width.

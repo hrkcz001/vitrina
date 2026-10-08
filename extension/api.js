@@ -347,9 +347,10 @@ this.vitrina = class extends ExtensionAPI {
         doc.documentElement.setAttribute("right-menu-open", "true");
         if (!wasOpen) {
           // Opening hides the hamburger (display:none), so the mouseup/click of
-          // the SAME gesture lands on whatever is underneath. Any stray click
-          // arriving in capture would instantly re-close the flyout. Hold the
-          // guard until this gesture's button is released.
+          // the SAME gesture is re-targeted to a foreign element. The guard is
+          // NOT cleared on mouseup (mouseup PRECEDES click, so that would defeat
+          // it): it is consumed by the next outside-click check in onDocClick,
+          // with a mousedown fallback below for the no-click (drag) case.
           rightJustOpened = true;
         }
       } else {
@@ -359,11 +360,12 @@ this.vitrina = class extends ExtensionAPI {
       }
     };
 
-    // Release the open guard once the pointer is up (independent of where it
-    // ends up, because the hamburger has been removed from the layout).
-    const onPointerUp = () => { rightJustOpened = false; };
-    doc.addEventListener("pointerup", onPointerUp, true);
-    doc.addEventListener("mouseup", onPointerUp, true);
+    // Fallback: a fresh mousedown (a new gesture) clears the guard, so a drag
+    // that produces no click cannot leave it stuck. Document-capture fires
+    // before the button's own capture handler, so the opening mousedown is
+    // unaffected (it clears a flag that is not set yet, then the button sets it).
+    const onDocMouseDown = () => { rightJustOpened = false; };
+    doc.addEventListener("mousedown", onDocMouseDown, true);
 
     const onPanelBtnMouseDown = e => {
       if (e.button !== 0) return;
@@ -400,8 +402,14 @@ this.vitrina = class extends ExtensionAPI {
       if (!this.alwaysShowLeft && !controlBox.contains(e.target)) {
         toggleLeftFlyout(false);
       }
-      if (!this.alwaysShowRight && rightOpen && !rightJustOpened && !rightFlyout.contains(e.target) && !panelBtn?.contains(e.target)) {
-        toggleRightFlyout(false);
+      if (!this.alwaysShowRight && rightOpen && !rightFlyout.contains(e.target) && !panelBtn?.contains(e.target)) {
+        if (rightJustOpened) {
+          // Consume the guard: swallow ONLY the re-targeted click of the very
+          // gesture that opened the flyout. The next outside click closes.
+          rightJustOpened = false;
+        } else {
+          toggleRightFlyout(false);
+        }
       }
     };
     doc.addEventListener("click", onDocClick, true);
@@ -433,8 +441,13 @@ this.vitrina = class extends ExtensionAPI {
 
       if (isRightOpen) {
         const rightRect = rightFlyout.getBoundingClientRect();
-        const panelRect = panelBtn ? panelBtn.getBoundingClientRect() : rightRect;
-        if (x < rightRect.left - marginX || x > panelRect.right + marginNear) {
+        // The deck inside the flyout is the right-most visible thing when the
+        // menu is open (the hamburger is display:none, so its rect would be all
+        // zeros and would close the menu on the first mouse move). Fall back to
+        // the flyout's own rect whenever the button's is empty.
+        const panelRect = panelBtn ? panelBtn.getBoundingClientRect() : null;
+        const rightEdge = panelRect && panelRect.width > 0 ? panelRect.right : rightRect.right;
+        if (x < rightRect.left - marginX || x > rightEdge + marginNear) {
           toggleRightFlyout(false);
         }
       }
@@ -510,8 +523,7 @@ this.vitrina = class extends ExtensionAPI {
         extObserver?.disconnect();
         doc.removeEventListener("click", onDocClick, true);
         doc.removeEventListener("mousemove", onDocMouseMove);
-        doc.removeEventListener("pointerup", onPointerUp, true);
-        doc.removeEventListener("mouseup", onPointerUp, true);
+        doc.removeEventListener("mousedown", onDocMouseDown, true);
         controlBtn.removeEventListener("click", onControlClick);
         controlBtn.removeEventListener("contextmenu", onControlContextMenu);
         panelBtn?.removeEventListener("mousedown", onPanelBtnMouseDown, true);
